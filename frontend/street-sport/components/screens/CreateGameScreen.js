@@ -11,9 +11,9 @@ import {
 export const CreateGameScreen = props => {
     return (
         <SafeAreaView style={styles.container}>
-          <View style={styles.header}>
+          {/* <View style={styles.header}>
             <Text style={styles.headerText}>Создание игры</Text>
-          </View>
+          </View> */}
           <ScrollView>
             <View style={styles.contentInfoWrap}>
               <View style={styles.contentInfo}>

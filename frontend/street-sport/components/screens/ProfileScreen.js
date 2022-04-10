@@ -11,9 +11,9 @@ import {
 export const ProfileScreen = props => {
     return (
         <SafeAreaView style={styles.container}>
-          <View style={styles.header}>
+          {/* <View style={styles.header}>
             <Text style={styles.headerText}>Профиль спортсмена</Text>
-          </View>
+          </View> */}
           <ScrollView>
             <View style={styles.contentProfilePicNameWrap}>
               <Image source={require('../../assets/profilePhoto.jpg')}
@@ -53,6 +53,7 @@ const styles = StyleSheet.create({
       fontSize: 18,
     },
     contentProfilePicNameWrap:{
+      marginTop: 20,
       alignItems: 'center',
     },
     contentProfilePicImage:{
