@@ -10,13 +10,14 @@ const Tab = createBottomTabNavigator();
 const Tabs = () =>{
     return(
         <Tab.Navigator
+            
             screenOptions={{
                 "tabBarShowLabel":false,
                 "tabBarStyle":[
                     {
-                        "position":"absolute",
+                        // "position":"absolute",
                         "bottom": 0,
-                        "borderRadius": 20,
+                        // "borderRadius": 20,
                         "borderBottomLeftRadius":0,
                         "borderBottomRightRadius":0,
                         "height": 80,
@@ -28,7 +29,8 @@ const Tabs = () =>{
                 ]
             }}
         >
-            <Tab.Screen name="Поиск" component={SearchScreen} options={{
+            <Tab.Screen name="Поиск игры" component={SearchScreen} options={{
+                
                 tabBarIcon: ({focused}) => (
                     <View style={{
                         alignItems: 'center',
@@ -51,7 +53,7 @@ const Tabs = () =>{
                     </View>
                 )
             }} />
-            <Tab.Screen name="Создать" component={CreateGameScreen} options={{
+            <Tab.Screen name="Создать игру" component={CreateGameScreen} options={{
                 tabBarIcon: ({focused}) => (
                     <View style={{
                         alignItems: 'center',
@@ -74,7 +76,7 @@ const Tabs = () =>{
                     </View>
                 )
             }}/>
-            <Tab.Screen name="Профиль" component={ProfileScreen} options={{
+            <Tab.Screen name="Профиль спортсмена" component={ProfileScreen} options={{
                 tabBarIcon: ({focused}) => (
                     <View style={{
                         alignItems: 'center',

@@ -10,6 +10,8 @@ import Tabs from './components/navigation/Tabs';
 
 export default function App() {
   return(
+      // <Login />
+
       <NavigationContainer>
         <Tabs />
       </NavigationContainer>

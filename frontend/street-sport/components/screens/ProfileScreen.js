@@ -7,6 +7,7 @@ import {
     Image, 
     ScrollView,
 } from 'react-native';
+import Switcher from '../uiElements/Switcher';
 
 export const ProfileScreen = props => {
     return (
@@ -31,6 +32,19 @@ export const ProfileScreen = props => {
                 <Text style={styles.contentInfoH2}>почта</Text>
                 <Text style={styles.contentInfoContent}>ki••••.••••@yandex.ru</Text>
               </View>
+
+              <View style={styles.contentInfo}>
+                <Text style={styles.contentInfoH2}>геолокация</Text>
+                <Switcher
+                  selectionMode={1}
+                  roundCorner={true}
+                  option1={'Включена'}
+                  option2={'Выключена'}
+                  //onSelectSwitch={onSelectSwitch}
+                  selectionColor={'#585858'}
+                />
+              </View>
+
             </View>
           </ScrollView>
         </SafeAreaView>
