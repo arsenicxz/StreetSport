@@ -52,6 +52,13 @@ export const CreateGameScreen = props => {
                 />
               </View>
 
+              <View style={styles.contentInfo}>
+                <Text style={styles.contentInfoH2}>на карте</Text>
+                <View>
+
+                </View>
+              </View>
+
             </View>
           </ScrollView>
         </SafeAreaView>
