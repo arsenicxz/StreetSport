@@ -47,6 +47,23 @@ export const CreateGameScreen = props => {
       getResponse();
     };
 
+    const SeacrhItem = ({props}) => {
+      return (
+        <TouchableOpacity 
+          style={styles.searchItems} 
+          onPress={() => {
+            if(props.data.geo_lat != null && props.data.geo_lon != null){
+              setLatitude(parseFloat(props.data.geo_lat));
+              setLongitude(parseFloat( props.data.geo_lon));
+              setSearchValue(props.value);
+              setVisibleSearchList(false);
+            }}}
+        >
+          <Text>{props.value}</Text>
+      </TouchableOpacity>
+      )
+    }
+
     return (
         <SafeAreaView style={styles.container}>
           {/* <View style={styles.header}>
