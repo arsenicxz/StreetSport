@@ -1,24 +1,60 @@
 import {useState} from 'react';
 import { 
     StyleSheet, 
-    Text, 
+    Text,
+    Button, 
     View,  
     SafeAreaView,
     TextInput, 
     Image, 
     ScrollView,
     FlatList,
-    TouchableOpacity
+    TouchableOpacity,
+    Platform
 } from 'react-native';
 import {Marker} from 'react-native-maps';
 import MapView from 'react-native-maps';
 import Switcher from '../uiElements/Switcher';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import DatePicker from 'react-native-datepicker';
 
 export const CreateGameScreen = props => {
     const [searchValue, setSearchValue] = useState('');
     const [searchData, setSearchData] = useState([]);
     const [latitudeState, setLatitude] = useState(37.425);
     const [longitudeState, setLongitude] = useState(-122.085);
+
+
+
+  const [date, setDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
+  const [time, setTime] = useState(new Date());
+  const [showTimePicker, setShowTimePicker] = useState(false);
+
+  const onChange = (event, selectedDate) => {
+    const currentDate = selectedDate;
+    setShowDatePicker(Platform.OS == 'ios');
+    setDate(currentDate);
+  };
+
+  const onChangeTime = (event, selectedTime) => {
+    const currentDate = selectedTime;
+    setShowTimePicker(Platform.OS == 'ios');
+    setTime(currentDate);
+  };
+
+  const showDateMode = (currentMode) => {
+    setShowDatePicker(true);
+  };
+
+  const showTimeMode = (currentMode) => {
+    setShowTimePicker(true);
+  };
+
+
+
+
 
     const [visibleSearchList, setVisibleSearchList] = useState(false);
 
@@ -73,9 +109,60 @@ export const CreateGameScreen = props => {
             <View style={styles.contentInfoWrap}>
               <View style={styles.contentInfo}>
                 <Text style={styles.contentInfoH2}>когда играем</Text>
-                <Text style={styles.contentInfoContent}>1.04.2022</Text>
+
+                {Platform.OS != 'ios' && (
+                  <View>
+                  <TouchableOpacity style={styles.datePicker} onPress={() => showDateMode('date')}>
+                    <Text style={styles.datePickerText}>{date.getDate()}</Text>
+                    <Text style={styles.datePickerText}>{date.getMonth()}</Text>
+                    <Text style={[styles.datePickerText, {flex: 3, borderRightWidth: 0}]}>{date.getFullYear()}</Text>
+                  </TouchableOpacity>
+                  </View>
+                )}
+                
+               
+                {(Platform.OS == 'ios' || showDatePicker) && (
+                  <View style={{width: 110}}>
+                  <DateTimePicker
+                    display={Platform.OS == 'ios' ? 'compact' : 'default'}
+                    
+                    testID="dateTimePicker"
+                    value={date}
+                    mode="date"
+                    is24Hour={true}
+                    onChange={onChange}
+                  />
+                  </View>
+                  
+                )}
+
               </View>
               
+              <View style={styles.contentInfo}>
+                <Text style={styles.contentInfoH2}>во сколько</Text>
+                {Platform.OS != 'ios' && (
+                  <View>
+                  <TouchableOpacity style={styles.timePicker} onPress={() => showTimeMode('time')}>
+                    <Text>{time.getHours()}:{time.getMinutes()}</Text>
+                  </TouchableOpacity>
+                  </View>
+                )}
+
+                {(Platform.OS == 'ios' || showTimePicker) && (
+                  <View style={{width: 70}}>
+                  <DateTimePicker
+                    display={Platform.OS == 'ios' ? 'compact' : 'default'}
+                    testID="timePicker"
+                    value={time}
+                    mode="time"
+                    is24Hour={true}
+                    onChange={onChangeTime}
+                  />
+                  </View>
+                  
+                )}
+              </View>
+
               <View style={styles.contentInfo}>
                 <Text style={styles.contentInfoH2}>тип игры</Text>
                 <Switcher
@@ -189,6 +276,7 @@ const styles = StyleSheet.create({
       letterSpacing: 1.07,
       fontSize: 14,
       fontWeight: '700',
+      marginBottom: 5,
     },
     contentInfoContent:{
       fontSize: 20,
@@ -231,5 +319,41 @@ const styles = StyleSheet.create({
         borderBottomWidth:1,
         borderColor: '#D1D1D1',
       },
+      datePicker: {
+        width: 150,
+        flexDirection: 'row',
+        height: 35,
+        
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: '#D1D1D1',
+        backgroundColor: '#F9F9F9',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        
+      },
+      datePickerText: {
+        height: '100%',
+        flex: 2,
+        textAlignVertical: 'center',
+        textAlign: 'center',
+        borderRightWidth: 1,
+        borderColor: '#D1D1D1',
+
+      },
+      timePicker: {
+        width: 90,
+        flexDirection: 'row',
+        height: 35,
+        paddingHorizontal: 20,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: '#D1D1D1',
+        backgroundColor: '#F9F9F9',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }
+      
+
   });
 
