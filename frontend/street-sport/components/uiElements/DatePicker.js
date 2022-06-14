@@ -8,6 +8,8 @@ import {
   Platform,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import Button from "./Button";
+import * as COLORS from "../../assets/colors";
 
 const DatePicker = ({}) => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -84,7 +86,15 @@ const DatePicker = ({}) => {
                   onChange={onChangeDate}
                 />
                 <View style={styles.modalViewButtonsLayout}>
-                  <TouchableOpacity
+                  <View style={{ flex: 1, marginHorizontal: 10 }}>
+                    <Button
+                      text="ОК"
+                      color={COLORS.LIGHT_PURPLE}
+                      colorOnPress={COLORS.DARK_PURPLE}
+                      onPress={()=>setModalVisible(!modalVisible)}
+                    />
+                  </View>
+                  {/* <TouchableOpacity
                     style={[styles.button, { backgroundColor: "#BF80FF" }]}
                     onPress={() => setModalVisible(!modalVisible)}
                   >
@@ -96,13 +106,16 @@ const DatePicker = ({}) => {
                     >
                       ОК
                     </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.button, { backgroundColor: "#e4e4e4" }]}
-                    onPress={() => backToPreviousDate()}
-                  >
-                    <Text style={styles.buttonText}>Отменить</Text>
-                  </TouchableOpacity>
+                  </TouchableOpacity> */}
+                  <View style={{ flex: 1, marginHorizontal: 10, }}>
+                    <Button
+                      text="Отменить"
+                      color={COLORS.BACKGROUND_GRAY}
+                      colorOnPress={COLORS.HIGHLIGHT_GRAY}
+                      textColor={COLORS.BLACK}
+                      onPress={()=>backToPreviousDate()}
+                    />
+                  </View>
                 </View>
               </View>
             </TouchableOpacity>

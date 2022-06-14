@@ -6,8 +6,11 @@ import {
   TouchableOpacity,
   Modal,
   Platform,
+  Pressable
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import Button from "./Button";
+import * as COLORS from "../../assets/colors";
 
 
 const TimePicker = ({}) => {
@@ -56,7 +59,7 @@ const TimePicker = ({}) => {
               setModalVisible(!modalVisible);
             }}
           >
-            <TouchableOpacity
+            <Pressable
               onPress={() => backToPreviousTime()}
               style={styles.centeredView}
             >
@@ -72,31 +75,26 @@ const TimePicker = ({}) => {
                   onChange={onChangeTime}
                 />
                 <View style={styles.modalViewButtonsLayout}>
-                  <TouchableOpacity
-                    style={[
-                      styles.button,
-                      { backgroundColor: "#BF80FF", fontWeight: "700" },
-                    ]}
-                    onPress={() => setModalVisible(!modalVisible)}
-                  >
-                    <Text
-                      style={[
-                        styles.buttonText,
-                        { color: "white", fontWeight: "700" },
-                      ]}
-                    >
-                      ОК
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.button, { backgroundColor: "lightgray" }]}
-                    onPress={() => backToPreviousTime()}
-                  >
-                    <Text style={styles.buttonText}>Отменить</Text>
-                  </TouchableOpacity>
+                  <View style={{ flex: 1, marginHorizontal: 10 }}>
+                    <Button
+                      text="ОК"
+                      color={COLORS.LIGHT_PURPLE}
+                      colorOnPress={COLORS.DARK_PURPLE}
+                      onPress={()=>setModalVisible(!modalVisible)}
+                    />
+                  </View>
+                  <View style={{ flex: 1, marginHorizontal: 10, }}>
+                    <Button
+                      text="Отменить"
+                      color={COLORS.BACKGROUND_GRAY}
+                      colorOnPress={COLORS.HIGHLIGHT_GRAY}
+                      textColor={COLORS.BLACK}
+                      onPress={()=>backToPreviousTime()}
+                    />
+                  </View>
                 </View>
               </View>
-            </TouchableOpacity>
+            </Pressable>
           </Modal>
         </View>
       )}

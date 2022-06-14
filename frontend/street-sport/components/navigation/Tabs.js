@@ -4,6 +4,7 @@ import reactDom from 'react-dom';
 import { CreateGameScreen } from '../screens/CreateGameScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { SearchScreen } from '../screens/SearchScreen';
+import * as COLORS from "../../assets/colors";
 
 const Tab = createBottomTabNavigator();
 
@@ -38,14 +39,14 @@ const Tabs = () =>{
                         width: 82,
                         height: 64,
                         borderRadius: 16,
-                        backgroundColor: focused ? '#e9e9e9' : '#fff'
+                        backgroundColor: focused ? (COLORS.BACKGROUND_GRAY) : (null)
                     }}>
                         <Image 
                             source={require('../../assets/icons/search.png')}
                             resizeMode="contain"
                             style={{
-                                width: 20,
-                                height: 20,
+                                width: '5%',
+                                height: '5%',
                                 marginBottom: 6,
                             }}
                         />
@@ -61,7 +62,7 @@ const Tabs = () =>{
                         width: 82,
                         height: 64,
                         borderRadius: 16,
-                        backgroundColor: focused ? '#e9e9e9' : '#fff'
+                        backgroundColor: focused ? (COLORS.BACKGROUND_GRAY) : (null)
                     }}>
                         <Image 
                             source={require('../../assets/icons/create.png')}
@@ -84,7 +85,7 @@ const Tabs = () =>{
                         width: 82,
                         height: 64,
                         borderRadius: 16,
-                        backgroundColor: focused ? '#e9e9e9' : '#fff'
+                        backgroundColor: focused ? (COLORS.BACKGROUND_GRAY) : (null)
                     }}>
                         <Image 
                             source={require('../../assets/icons/profile.png')}

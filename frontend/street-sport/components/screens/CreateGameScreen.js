@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
-  Button,
   View,
   SafeAreaView,
   TextInput,
@@ -12,6 +11,7 @@ import {
   TouchableOpacity,
   Dimensions,
   Modal,
+  Platform,
 } from "react-native";
 import { Marker } from "react-native-maps";
 import MapView from "react-native-maps";
@@ -19,10 +19,11 @@ import Switcher from "../uiElements/Switcher";
 import DatePicker from "../uiElements/DatePicker";
 import TimePicker from "../uiElements/TimePicker";
 import { Picker } from "@react-native-picker/picker";
+import Button from "../uiElements/Button";
+import * as COLORS from "../../assets/colors";
 
 export const CreateGameScreen = (props) => {
-  const [searchValue, setSearchValue] = useState("");
-  const [searchData, setSearchData] = useState([]);
+  
   const [latitudeState, setLatitude] = useState(37.425);
   const [longitudeState, setLongitude] = useState(-122.085);
 
@@ -52,51 +53,6 @@ export const CreateGameScreen = (props) => {
     setModalVisible(false);
   };
 
-  const [visibleSearchList, setVisibleSearchList] = useState(false);
-
-  var url =
-    "https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address";
-  var token = "1b276ccfa98080a05a669e7b807851a75a2a0585";
-
-  var options = {
-    method: "POST",
-    mode: "cors",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      Authorization: "Token " + token,
-    },
-    body: JSON.stringify({ query: searchValue }),
-  };
-
-  async function getResponse() {
-    let response = await fetch(url, options);
-    let content = await response.json();
-    setSearchData(content.suggestions);
-  }
-
-  const searchInputHandler = (enteredtext) => {
-    setSearchValue(enteredtext);
-    getResponse();
-  };
-
-  const SeacrhItem = ({ props }) => {
-    return (
-      <TouchableOpacity
-        style={styles.searchItems}
-        onPress={() => {
-          if (props.data.geo_lat != null && props.data.geo_lon != null) {
-            setLatitude(parseFloat(props.data.geo_lat));
-            setLongitude(parseFloat(props.data.geo_lon));
-            setSearchValue(props.value);
-            setVisibleSearchList(false);
-          }
-        }}
-      >
-        <Text>{props.value}</Text>
-      </TouchableOpacity>
-    );
-  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -132,17 +88,18 @@ export const CreateGameScreen = (props) => {
             <Text style={styles.contentInfoH2}>во что играем</Text>
             <TextInput style={styles.input} placeholder={"Игра..."} />
             {/* <Picker
-                  selectedValue={selectedLanguage}
-                  onValueChange={(itemValue, itemIndex) =>
-                    setSelectedLanguage(itemValue)
-                  }>
-                  <Picker.Item label="Футбол" value="java" />
-                  <Picker.Item label="Баскетбол" value="js" />
-                  <Picker.Item label="Волейбол" value="js" />
-                  <Picker.Item label="Йога" value="js" />
-                  <Picker.Item label="Хоккей" value="js" />
-                  <Picker.Item label="Хоккей с мячом" value="js" />
-                </Picker> */}
+              selectedValue={selectedLanguage}
+              onValueChange={(itemValue, itemIndex) =>
+                setSelectedLanguage(itemValue)
+              }
+            >
+              <Picker.Item label="Футбол" value="java" />
+              <Picker.Item label="Баскетбол" value="js" />
+              <Picker.Item label="Волейбол" value="js" />
+              <Picker.Item label="Йога" value="js" />
+              <Picker.Item label="Хоккей" value="js" />
+              <Picker.Item label="Хоккей с мячом" value="js" />
+            </Picker> */}
           </View>
 
           <View style={styles.contentInfo}>
@@ -177,35 +134,6 @@ export const CreateGameScreen = (props) => {
               />
             </Modal>
 
-            <SafeAreaView>
-              {visibleSearchList ? (
-                <FlatList
-                  style={styles.searchContainer}
-                  data={searchData}
-                  keyExtractor={({ id }, index) => id}
-                  renderItem={({ item }) => (
-                    <TouchableOpacity
-                      style={styles.searchItems}
-                      onPress={() => {
-                        if (
-                          item.data.geo_lat != null &&
-                          item.data.geo_lon != null
-                        ) {
-                          setLatitude(parseFloat(item.data.geo_lat));
-                          setLongitude(parseFloat(item.data.geo_lon));
-                          setSearchValue(item.value);
-                          setVisibleSearchList(false);
-                        }
-                      }}
-                    >
-                      <Text>{item.value}</Text>
-                    </TouchableOpacity>
-                  )}
-                />
-              ) : (
-                <View></View>
-              )}
-            </SafeAreaView>
           </View>
 
           <View style={styles.contentInfo}>
@@ -231,6 +159,12 @@ export const CreateGameScreen = (props) => {
               </MapView>
             </View>
           </View>
+
+          <Button
+            text="Создать игру"
+            color={COLORS.LIGHT_PURPLE}
+            colorOnPress={COLORS.DARK_PURPLE}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -402,21 +336,14 @@ const SearchWithMapModal = (props) => {
           </Text>
           <View style={{ flex: 1, flexDirection: "row" }}>
             {visibleConfirmButton && (
-              <TouchableOpacity
+              <Button
                 onPress={() => {
                   props.onConfirmButton(currentLocation);
                 }}
-                style={[
-                  stylesMap.button,
-                  { flex: 1, backgroundColor: "#BF80FF" },
-                ]}
-              >
-                <Text
-                  style={{ fontSize: 18, fontWeight: "700", color: "white" }}
-                >
-                  Подтвердить
-                </Text>
-              </TouchableOpacity>
+                text="Подтвердить"
+                color={COLORS.LIGHT_PURPLE}
+                colorOnPress={COLORS.DARK_PURPLE}
+              />
             )}
           </View>
         </View>

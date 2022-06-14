@@ -4,8 +4,9 @@ import {
   View,
   SafeAreaView,
   Image,
-  TouchableOpacity,
 } from "react-native";
+import Button from "../uiElements/Button";
+import * as COLORS from "../../assets/colors";
 
 export const SearchScreen = (props) => {
   return (
@@ -20,9 +21,11 @@ export const SearchScreen = (props) => {
           Сервис для объединения {"\n"}
           уличных спортсменов
         </Text>
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Найти</Text>
-        </TouchableOpacity>
+        <Button
+          text="Найти"
+          color={COLORS.LIGHT_PURPLE}
+          colorOnPress={COLORS.DARK_PURPLE}
+        />
       </View>
     </SafeAreaView>
   );
@@ -30,25 +33,11 @@ export const SearchScreen = (props) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#f3f3f3",
+    backgroundColor: (COLORS.BACKGROUND_GRAY),
     flex: 1,
     justifyContent: "center",
   },
   contentWrap: {
     marginHorizontal: 14,
-  },
-  button: {
-    width: "100%",
-    height: 60,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    marginVertical: 5,
-    backgroundColor: "#BF80FF",
-  },
-  buttonText: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#fff",
   },
 });
