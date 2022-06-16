@@ -26,7 +26,7 @@ export const Login = (props) => {
   function req(value) {
     var request = new XMLHttpRequest();
 
-    request.open("POST", "https://346b-5-144-118-128.eu.ngrok.io");
+    request.open("POST", "http://localhost:8001/loginhandler");
     request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     request.onreadystatechange = reqReadyStateChange(request);
     request.responseType = 'text';
@@ -44,7 +44,8 @@ export const Login = (props) => {
   }
 
   function LoginTry(){
-    var reqLogInf = "mod=" + "authorization" + "&login=" + "&password=";
+    var reqLogInf = "mod=" + "CheckUserAuth" + "&login=krosh@mail.ru" + "&password=qwerty";
+    console.log(reqLogInf);
     req(reqLogInf);
   }
 
