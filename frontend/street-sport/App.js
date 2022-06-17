@@ -42,12 +42,10 @@
 //     }
 //   }, [searchValue])
 
-
-
 //   return (
 //     <View style={styles.container}>
 //       <View style={styles.searchInput}>
-//         <TextInput 
+//         <TextInput
 //             style={styles.input}
 //             placeholder={"Найдётся многое..."}
 //             onChangeText={searchInputHandler}
@@ -77,24 +75,24 @@
 //           /> ) : (<View></View>)
 
 //           }
-          
+
 //         </View>
 //       </View>
-//       <MapView 
-//         style={styles.map} 
+//       <MapView
+//         style={styles.map}
 //         provider="google"
 //         region={{
 //           latitude: latitudeState,
 //           longitude: longitudeState,
 //           latitudeDelta: 0.0922,
-//           longitudeDelta: 0.0481, 
+//           longitudeDelta: 0.0481,
 //         }}
 //       >
 //         <Marker
 //           coordinate={{latitude: latitudeState, longitude: longitudeState}}
 //           title='Here you go!'
 //         >
-          
+
 //         </Marker>
 //       </MapView>
 //     </View>
@@ -140,7 +138,7 @@
 //     borderRadius: 14,
 //     borderWidth: 1,
 //     borderColor: '#D1D1D1',
-//   },  
+//   },
 //   searchItems: {
 //     padding: 16,
 //     fontSize: 16,
@@ -149,25 +147,27 @@
 //   },
 // });
 
-
-
-
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View } from 'react-native';
-import { Login } from './components/login/Login';
-import { NavigationContainer } from '@react-navigation/native';
-import Tabs from './components/navigation/Tabs';
+import { StatusBar } from "expo-status-bar";
+import { StyleSheet, View } from "react-native";
+import { Login } from "./components/login/Login";
+import { NavigationContainer } from "@react-navigation/native";
+import Tabs from "./components/navigation/Tabs";
+import GameScreen from "./components/gameScreen/GameScreen";
+import ListGames from "./components/gameScreen/ListGames";
+import NavigationBetweenGames from "./components/gameScreen/NavigationBetweenGames";
 
 export default function App() {
-  return(
-      // <Login />
+  return (
+    <NavigationContainer>
+      <NavigationBetweenGames />
+    </NavigationContainer>
 
-      <NavigationContainer>
+    // <Login />
+
+    /*<NavigationContainer>
         <Tabs />
-      </NavigationContainer>
-  )
+      </NavigationContainer>*/
+  );
 }
 
-const styles = StyleSheet.create({
-  
-});
+const styles = StyleSheet.create({});
