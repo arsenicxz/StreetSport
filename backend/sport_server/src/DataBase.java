@@ -1,7 +1,6 @@
 import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.*;
@@ -28,55 +27,46 @@ public class DataBase {
     }
 
     //проверка авторизованности пользователя
-    public String CheckUserAuth(int check, String mail, long telephone, String password) {
-        /*String query = "SELECT username, password" +
-                "FROM user " +
-                "WHERE username = '" + username + "' AND password = '" + password + "'";
-
-                check = 1 - telephone;
-                check = 2 - mail
-         */
-        switch (check) {
-            case 1:
-                String query1 = "SELECT telephone, password" +
-                        "FROM user " +
-                        "WHERE telephone = '" + telephone + "' AND password = '" + password + "'";
-                try {
-                    PreparedStatement prSt = dbConnection.prepareStatement(query1);
-                    ResultSet result =  prSt.executeQuery();
-                    if(result.next()) {
-                        return "Success\n";
-                    }
-                    return "Error\n";
+    public boolean CheckUserAuth (String login, String password) {
+        if (login.contains("@")) {
+            String query = "SELECT mail, password" +
+                    "FROM user " +
+                    "WHERE mail = '" + login + "' AND password = '" + password + "'";
+            try {
+                PreparedStatement prSt = dbConnection.prepareStatement(query);
+                ResultSet result =  prSt.executeQuery();
+                if(result.next()) {
+                    return true;
                 }
-                catch (SQLException e) {
-                    e.printStackTrace();
-                    return "Error\n";
+                return false;
+            }
+            catch (SQLException e) {
+                e.printStackTrace();
+                return false;
+            }
+        } else {
+            String query = "SELECT telephone, password" +
+                    "FROM user " +
+                    "WHERE telephone = '" + login + "' AND password = '" + password + "'";
+            try {
+                PreparedStatement prSt = dbConnection.prepareStatement(query);
+                ResultSet result =  prSt.executeQuery();
+                if(result.next()) {
+                    return true;
                 }
-            case 2:
-                String query2 = "SELECT mail, password" +
-                        "FROM user " +
-                        "WHERE mail = '" + mail + "' AND password = '" + password + "'";
-                try {
-                    PreparedStatement prSt = dbConnection.prepareStatement(query2);
-                    ResultSet result =  prSt.executeQuery();
-                    if(result.next()) {
-                        return "Success\n";
-                    }
-                    return "Error\n";
-                }
-                catch (SQLException e) {
-                    e.printStackTrace();
-                    return "Error\n";
-                }
-                default:
-                    return "Error\n";
+                return false;
+            }
+            catch (SQLException e) {
+                e.printStackTrace();
+                return false;
+            }
         }
     }
 
-    //добавление (создание) профиля пользователя
-    public String NewUser(String username,
-                          long telephone,
+    //добавление/создание профиля пользователя
+    //в бд работает
+    public boolean NewUser(String username,
+                          String telephone,
                           String mail,
                           String password) {
         try {
@@ -86,24 +76,24 @@ public class DataBase {
                     "(?,?,?,?)";
             PreparedStatement prSt = dbConnection.prepareStatement(query);
             prSt.setString(1, username);
-            prSt.setLong(2, telephone);
+            prSt.setString(2, telephone);
             prSt.setString(3, mail);
             prSt.setString(4, password);
-            //6 - рейтинг user'а - как присваивать???
-            return "Success\n";
+            return true;
         }
         catch (SQLException e) {
             e.printStackTrace();
-            return "Error\n";
+            return false;
         }
     }
 
     //редактирование профиля пользователя
-    public String EditUser (int userid,
-                           String username,
-                          long telephone,
-                          String mail,
-                          String password) {
+    //в бд работает
+    public boolean EditUser (int userid,
+                            String username,
+                            String telephone,
+                            String mail,
+                            String password) {
         try {
             String query = "UPDATE user" +
                     "SET username = ?, telephone = ?," +
@@ -111,10 +101,49 @@ public class DataBase {
                     "WHERE id = ?";
             PreparedStatement prSt = dbConnection.prepareStatement(query);
             prSt.setString(1, username);
-            prSt.setLong(2, telephone);
+            prSt.setString(2, telephone);
             prSt.setString(3, mail);
             prSt.setString(4, password);
-            //6 - рейтинг user'а - как присваивать???
+            return true;
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    //удалить профиль пользователя
+    //в бд работает
+    public boolean DeleteUser (int userid) {
+        String query = "DELETE FROM user WHERE id = ?";
+        try {
+            PreparedStatement prSt = dbConnection.prepareStatement(query);
+            prSt.setInt(1, userid);
+            prSt.execute();
+            return true;
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    //выбор интересующих игр
+    //страничка - мои игры
+    public String UserGames (int userid, int gametypeid) {
+        try {
+            /*String query ="INSERT INTO usergamelike" +
+                    "(userid, gametypeid)" +
+                    "VALUES (?,?)";
+            PreparedStatement prSt = dbConnection.prepareStatement(query);
+            prSt.setInt(1, userid);
+            prSt.setInt(2, gametypeid);
+            return "Success\n";*/
+            String query = "INSERT INTO usergamelike" +
+                    "(userid, gametypeid) VALUES (?,?) ";
+            PreparedStatement prSt = dbConnection.prepareStatement(query);
+            prSt.setInt(1, userid);
+            prSt.setInt(2, gametypeid);
             return "Success\n";
         }
         catch (SQLException e) {
