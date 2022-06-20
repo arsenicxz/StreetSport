@@ -1,0 +1,28 @@
+  [{
+    "name":"Футбол",
+    "time":"20:00",
+    "location":"г.Санкт-Петербург, пр-т Большевиков 22",
+    "countPeople": 5,
+    "rating":true
+  },
+  {
+    "name":"Йога",
+    "time":"22:00",
+    "location":"г.Санкт-Петербург, ул Дыбенко 23",
+    "countPeople": 7,
+    "rating":false
+  },
+  {
+    "name":"Футбол",
+    "time":"20:00",
+    "location":"г.Санкт-Петербург, пр-т Большевиков 22",
+    "countPeople": 5,
+    "rating":true
+  },
+  {
+    "name":"Йога",
+    "time":"22:00",
+    "location":"г.Санкт-Петербург, ул Дыбенко 23",
+    "countPeople": 7,
+    "rating":false
+  }]
