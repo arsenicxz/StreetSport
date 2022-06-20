@@ -6,7 +6,7 @@ import {
   Image,
 } from "react-native";
 import Button from "../uiElements/Button";
-import * as COLORS from "../../assets/colors";
+import COLORS from "../../assets/colors";
 
 export const SearchScreen = (props) => {
   return (

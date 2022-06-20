@@ -8,7 +8,8 @@ import {
   TouchableOpacity,
 } from "react-native";
 import Button from "../uiElements/Button";
-import * as COLORS from "../../assets/colors";
+import COLORS from "../../assets/colors";
+import { Colors } from "react-native/Libraries/NewAppScreen";
 
 export const Login = (props) => {
   var reqResult;
@@ -17,7 +18,6 @@ export const Login = (props) => {
     if (request.readyState == 4) {
         var status = request.status;
         if (status == 200) {
-            //document.getElementById("output").innerHTML=request.responseText;
             console.log(request.responseText);
         }
     }
@@ -87,7 +87,7 @@ export const Login = (props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f3f3f3",
+    backgroundColor: COLORS.BACKGROUND_GRAY,
     justifyContent: "center",
   },
   containerWrap: {
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: "#D1D1D1",
+    borderColor: COLORS.BORDER_GRAY,
     backgroundColor: "#F9F9F9",
     alignItems: "center",
     justifyContent: "center",

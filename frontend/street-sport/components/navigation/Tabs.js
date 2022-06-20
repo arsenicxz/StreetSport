@@ -4,7 +4,7 @@ import reactDom from 'react-dom';
 import { CreateGameScreen } from '../screens/CreateGameScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { SearchScreen } from '../screens/SearchScreen';
-import * as COLORS from "../../assets/colors";
+import COLORS from "../../assets/colors";
 
 const Tab = createBottomTabNavigator();
 
@@ -16,9 +16,7 @@ const Tabs = () =>{
                 "tabBarShowLabel":false,
                 "tabBarStyle":[
                     {
-                        // "position":"absolute",
                         "bottom": 0,
-                        // "borderRadius": 20,
                         "borderBottomLeftRadius":0,
                         "borderBottomRightRadius":0,
                         "height": 80,
@@ -45,8 +43,8 @@ const Tabs = () =>{
                             source={require('../../assets/icons/search.png')}
                             resizeMode="contain"
                             style={{
-                                width: '5%',
-                                height: '5%',
+                                width: 20,
+                                height: 20,
                                 marginBottom: 6,
                             }}
                         />

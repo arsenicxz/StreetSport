@@ -1,10 +1,13 @@
-export const BACKGROUND_GRAY = "#F3F3F3";
-export const BLACK = "#000000";
-export const ALMOST_BLACK = "#717171";
-export const BORDER_GRAY = "#474747";
+export default {
+    BACKGROUND_GRAY: '#F3F3F3',
+    BLACK: '#000000',
+    ALMOST_BLACK: '#717171',
+    BORDER_GRAY: '#D1D1D1',
 
-export const HIGHLIGHT_GRAY = "#656565";
+    HIGHLIGHT_GRAY: '#656565',
 
-export const LIGHT_PURPLE = "#BF80FF";
-export const DARK_PURPLE = "#A142FF";
+    LIGHT_PURPLE: '#BF80FF',
+    DARK_PURPLE: '#A142FF'
+};
+
 
