@@ -29,8 +29,7 @@ public class DataBase {
     //проверка авторизованности пользователя
     public boolean CheckUserAuth (String login, String password) {
         if (login.contains("@")) {
-            String query = "SELECT mail, password" +
-                    "FROM user " +
+            String query = "SELECT mail, password FROM user " +
                     "WHERE mail = '" + login + "' AND password = '" + password + "'";
             try {
                 PreparedStatement prSt = dbConnection.prepareStatement(query);
@@ -45,8 +44,7 @@ public class DataBase {
                 return false;
             }
         } else {
-            String query = "SELECT telephone, password" +
-                    "FROM user " +
+            String query = "SELECT telephone, password FROM user " +
                     "WHERE telephone = '" + login + "' AND password = '" + password + "'";
             try {
                 PreparedStatement prSt = dbConnection.prepareStatement(query);
@@ -64,16 +62,13 @@ public class DataBase {
     }
 
     //добавление/создание профиля пользователя
-    //в бд работает
     public boolean NewUser(String username,
                           String telephone,
                           String mail,
                           String password) {
         try {
-            String query = "INSERT INTO user" +
-                    "(username, telephone, mail, password)" +
-                    "VALUES" +
-                    "(?,?,?,?)";
+            String query = "INSERT INTO user (username, telephone, mail, password) " +
+                    "VALUES (?,?,?,?)";
             PreparedStatement prSt = dbConnection.prepareStatement(query);
             prSt.setString(1, username);
             prSt.setString(2, telephone);
@@ -88,17 +83,14 @@ public class DataBase {
     }
 
     //редактирование профиля пользователя
-    //в бд работает
     public boolean EditUser (int userid,
                             String username,
                             String telephone,
                             String mail,
                             String password) {
         try {
-            String query = "UPDATE user" +
-                    "SET username = ?, telephone = ?," +
-                    "mail = ?, password = ?" +
-                    "WHERE id = ?";
+            String query = "UPDATE user SET username = ?, telephone = ?," +
+                    "mail = ?, password = ? WHERE id = ?";
             PreparedStatement prSt = dbConnection.prepareStatement(query);
             prSt.setString(1, username);
             prSt.setString(2, telephone);
@@ -113,7 +105,6 @@ public class DataBase {
     }
 
     //удалить профиль пользователя
-    //в бд работает
     public boolean DeleteUser (int userid) {
         String query = "DELETE FROM user WHERE id = ?";
         try {

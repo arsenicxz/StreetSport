@@ -3,14 +3,12 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
-import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -20,18 +18,10 @@ public class Server {
     //сервер
     private HttpServer _server = null;
 
-    //переменные для базы данных
-    /*private HttpServer server = null;
-    private static final String db_addr = "jdbc:mysql://localhost:3306";
-    private static final String db_user = "root";
-    private static final String db_password = "qwerty123";*/
-
     //создание сервера
     public Server () throws IOException {
         _server = HttpServer.create(new InetSocketAddress("localhost", 8001), 0);
         System.out.println("server started at port 8001 (localhost)");
-
-        //ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
 
         _server.createContext("/", new MyHttpHandler() {
             @Override
@@ -41,12 +31,10 @@ public class Server {
         });
         _server.createContext("/login", new LoginHandler());
         _server.createContext("/reg", new NewUserHandler());
+        _server.createContext("/delete", new DeleteUserHandler());
+        _server.createContext("/edit", new EditUserHandler());
 
-        //_server.createContext("/", new RootHandler());
-
-        //_server.setExecutor(threadPoolExecutor);
         _server.setExecutor(null);
-
     }
 
     //запуск сервера
@@ -57,14 +45,15 @@ public class Server {
     //хендлер для принятия запросов на сервер
     abstract static class MyHttpHandler implements HttpHandler {
 
+        //public abstract int HandleHtml(String request, StringBuilder answer, String request_url);
         public abstract int HandleHtml(String request, StringBuilder answer, String request_url);
 
         public void handle (HttpExchange t) throws IOException {
             String reguest_url = t.getRequestURI().toString();
             System.out.println("Reguest URL : " + reguest_url);
             String requestMethod = t.getRequestMethod();
-            InputStream is; //используем для чтения данных запроса
-            String requestString = "";
+            InputStream is;
+            String requestObj = "";
             if (requestMethod.equalsIgnoreCase("POST")) {
                 try {
                     StringBuilder requestBuffer = new StringBuilder();
@@ -75,9 +64,9 @@ public class Server {
                     }
                     is.close();
                     if (requestBuffer.length() > 0) {
-                        requestString = URLDecoder.decode(requestBuffer.toString(), "UTF-8");
+                        requestObj = URLDecoder.decode(requestBuffer.toString(), "UTF-8");
                     } else {
-                        requestString = null;
+                        requestObj = null;
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -85,7 +74,7 @@ public class Server {
             }
             String response = "Error";
             StringBuilder answer = new StringBuilder();
-            HandleHtml(requestString, answer, reguest_url);
+            HandleHtml(requestObj, answer, reguest_url);
             response = answer.toString();
 
             ByteBuffer buffer = Charset.forName("UTF-8").encode(response);
@@ -105,7 +94,7 @@ public class Server {
 
     //авторизация пользователя
     public static class LoginHandler extends MyHttpHandler {
-        DataBase _dataBase;
+        private DataBase _dataBase;
         @Override
         public int HandleHtml(String request, StringBuilder answer, String request_url) {
             try {
@@ -116,13 +105,44 @@ public class Server {
                 e.printStackTrace();
             }
             //String s = "mod=CheckUserAuth&login=krosh&password=qwerty";
+            System.out.println(request);
             String obrabotka = ParceRequest(request);
             System.out.println(obrabotka);
-            answer.append("Success");
+            answer.append(obrabotka);
             return 200;
         }
 
         private String ParceRequest (String request) {
+            JSONObject answer = new JSONObject();
+            answer.put("answer", "server error!");
+            String result = answer.toJSONString();
+            try {
+                Object obj = new JSONParser().parse(request);
+                JSONObject req = (JSONObject) obj;
+                String mod = (String) req.get("mod");
+
+                if (mod.contains("CheckUserAuth")) {
+                    String login = (String) req.get("login");
+                    String password = (String) req.get("password");
+                    System.out.println("user: " + login + " " + password);
+
+                    if (_dataBase.CheckUserAuth(login, password)) {
+                        answer.put("answer", "user login in");
+                        result = answer.toJSONString();
+                        //return result;
+                    } else {
+                        answer.put("answer", "error 1!!!");
+                        result = answer.toJSONString();
+                        //return result;
+                    }
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            return result;
+        }
+
+        /*private String ParceRequest (String request) {
             String[] subs = request.split("&");
             if (subs[0].contains("CheckUserAuth")) {
                 String login = subs[1].split("=")[1];
@@ -139,9 +159,8 @@ public class Server {
             } else {
                 return "Error3";
             }
-        }
+        }*/
     }
-
 
     //регистрация пользователя
     public static class NewUserHandler extends MyHttpHandler {
@@ -155,36 +174,143 @@ public class Server {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            answer.append("Success");
+            System.out.println(request);
+            String obrabotka = ParceRequest(request);
+            System.out.println(obrabotka);
+            answer.append(obrabotka);
             return 200;
         }
 
         private String ParceRequest (String request) {
-            String[] subs = request.split("&");
-            if (subs[0].contains("NewUser")) {
-                String username = subs[1].split("=")[1];
-                String telephone = subs[2].split("=")[2];
-                String mail = subs[3].split("=")[3];
-                String password = subs[4].split("=")[4];
-                if (username != null && telephone != null && mail != null && password != null
-                        && !username.equals("") && !telephone.equals("") && !mail.equals("") && !password.equals("")) {
-                    _dataBase.NewUser(username, telephone, mail, password);
-                    return "create user\n";
-                } else {
-                    return "Error\n";
+            JSONObject answer = new JSONObject();
+            answer.put("answer", "server error!");
+            String result = answer.toJSONString();
+            try {
+                Object obj = new JSONParser().parse(request);
+                JSONObject req = (JSONObject) obj;
+                String mod = (String) req.get("mod");
+
+                if (mod.contains("NewUserReg")) {
+                    String username = (String) req.get("username");
+                    String telephone = (String) req.get("telephone");
+                    String mail = (String) req.get("mail");
+                    String password = (String) req.get("password");
+                    System.out.println("user: " + username + " " + telephone + " " + mail + " " + password);
+
+                    if (_dataBase.NewUser(username, telephone, mail, password)) {
+                        answer.put("answer", "you sign in");
+                        result = answer.toJSONString();
+                    } else {
+                        answer.put("answer", "error 1!!!");
+                        result = answer.toJSONString();
+                    }
                 }
-            } else {
-                return "Error\n";
+            } catch (ParseException e) {
+                e.printStackTrace();
             }
+            return result;
         }
     }
 
+    //удаление пользователя
+    public static class DeleteUserHandler extends MyHttpHandler {
+        DataBase _dataBase;
+        @Override
+        public int HandleHtml(String request, StringBuilder answer, String request_url) {
+            try {
+                _dataBase = new DataBase();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.println(request);
+            String obrabotka = ParceRequest(request);
+            System.out.println(obrabotka);
+            answer.append(obrabotka);
+            return 200;
+        }
 
-    public static void ReadJSON () {
-        String request = "";
-        String json = "";
+        private String ParceRequest (String request) {
+            JSONObject answer = new JSONObject();
+            answer.put("answer", "server error!");
+            String result = answer.toJSONString();
 
+            try {
+                Object obj = new JSONParser().parse(request);
+                JSONObject req = (JSONObject) obj;
+                String mod = (String) req.get("mod");
 
+                if (mod.contains("DeleteUser")) {
+                    int id = (int) req.get("id");
+                    System.out.println("user with id: " + id);
+
+                    if (_dataBase.DeleteUser(id)) {
+                        answer.put("answer", "this user deleted");
+                        result = answer.toJSONString();
+                    } else {
+                        answer.put("answer", "error 1!!!");
+                        result = answer.toJSONString();
+                    }
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            return result;
+        }
+    }
+
+    //редактирование профиля
+    public static class EditUserHandler extends MyHttpHandler {
+        DataBase _dataBase;
+        @Override
+        public int HandleHtml(String request, StringBuilder answer, String request_url) {
+            try {
+                _dataBase = new DataBase();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.println(request);
+            String obrabotka = ParceRequest(request);
+            System.out.println(obrabotka);
+            answer.append(obrabotka);
+            return 200;
+        }
+
+        private String ParceRequest (String request) {
+            JSONObject answer = new JSONObject();
+            answer.put("answer", "server error!");
+            String result = answer.toJSONString();
+
+            try {
+                Object obj = new JSONParser().parse(request);
+                JSONObject req = (JSONObject) obj;
+                String mod = (String) req.get("mod");
+
+                if (mod.contains("EditUser")) {
+                    int id = (int) req.get("id");
+                    String username = (String) req.get("username");
+                    String telephone = (String) req.get("telephone");
+                    String mail = (String) req.get("mail");
+                    String password = (String) req.get("password");
+                    System.out.println("user with id: " + id + " " + username
+                            + " " + telephone + " " + mail + " " + password);
+
+                    if (_dataBase.EditUser(id, username, telephone, mail, password)) {
+                        answer.put("answer", "your profile was edited");
+                        result = answer.toJSONString();
+                    } else {
+                        answer.put("answer", "error 1!!!");
+                        result = answer.toJSONString();
+                    }
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            return result;
+        }
     }
 
 }
