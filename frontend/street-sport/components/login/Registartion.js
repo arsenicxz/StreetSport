@@ -13,28 +13,48 @@ import Button from "../uiElements/Button";
 import COLORS from "../../assets/colors";
 import { useDispatch } from "react-redux";
 import * as authActions from "../../store/actions/auth";
+import Switcher from "../uiElements/Switcher";
 
-export const Login = ({ navigation }) => {
+export const Registration = ({ navigation }) => {
+  const [registrationViaEmail, setRegistartionViaEmail] = useState(1);
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState();
 
+  const [usernameValue, setUsernameValue] = useState("");
   const [emailValue, setEmailValue] = useState("");
+  const [phoneValue, setPhoneValue] = useState("");
   const [passwordValue, setPasswordValue] = useState("");
 
   const emailInputHandler = (enteredtext) => {
     setEmailValue(enteredtext);
   };
 
+  const phoneInputHandler = (enteredtext) => {
+    setPhoneValue(enteredtext);
+  };
+
   const passwordInputHandler = (enteredtext) => {
     setPasswordValue(enteredtext);
+  };
+
+  const usernameInputHandler = (enteredtext) => {
+    setUsernameValue(enteredtext);
   };
 
   const dispatch = useDispatch();
   const signUpHandler = async () => {
     setError(null);
     setIsLoading(true);
+    let loginValue;
+    if(registrationViaEmail == 1){
+      loginValue = emailValue;
+    }else{
+      loginValue = phoneValue;
+    }
     try {
-      await dispatch(authActions.signin(emailValue, passwordValue));
+      await dispatch(authActions.signup(loginValue, passwordValue));
+      Alert.alert("Успешно!", error, [{ text: "Закрыть", onPress: ()=>{navigation.goBack();} }]);
     } catch (err) {
       setError(err.message);
     }
@@ -43,9 +63,13 @@ export const Login = ({ navigation }) => {
 
   useEffect(() => {
     if (error) {
-      Alert.alert("Ошибка", error, [{ text: "Okay" }]);
+      Alert.alert("Ошибка", error, [{ text: "Ок" }]);
     }
   }, [error]);
+
+  const changeRegistrationMode = (value) => {
+    setRegistartionViaEmail(value);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -60,17 +84,49 @@ export const Login = ({ navigation }) => {
           уличных спортсменов{" "}
         </Text>
         <Text style={{ fontSize: 24, fontWeight: "700", marginBottom: 18 }}>
-          Вход
+          Регистрация
         </Text>
+        <View>
+          <Switcher
+            selectionMode={registrationViaEmail}
+            roundCorner={true}
+            option1={"Почта"}
+            option2={"Телефон"}
+            onSelectSwitch={changeRegistrationMode}
+            selectionColor={"#585858"}
+          />
+        </View>
         <TextInput
-          style={styles.input}
-          placeholder={"E-mail или телефон"}
-          autoCapitalize="none"
-          autoComplete="email"
-          placeholderTextColor="grey"
-          onChangeText={emailInputHandler}
-          value={emailValue}
-        />
+            style={styles.input}
+            placeholder={"Username"}
+            autoCapitalize="none"
+            autoComplete="username-new"
+            placeholderTextColor="grey"
+            onChangeText={usernameInputHandler}
+            value={usernameValue}
+          />
+        {registrationViaEmail == 1 ? (
+          <TextInput
+            style={styles.input}
+            placeholder={"E-mail"}
+            autoCapitalize="none"
+            autoComplete="email"
+            placeholderTextColor="grey"
+            onChangeText={emailInputHandler}
+            value={emailValue}
+          />
+        ) : (
+          <TextInput
+            style={styles.input}
+            keyboardType="phone-pad"
+            placeholder={"Телефон"}
+            autoCapitalize="none"
+            autoComplete="tel"
+            placeholderTextColor="grey"
+            onChangeText={phoneInputHandler}
+            value={phoneValue}
+          />
+        )}
         <TextInput
           style={styles.input}
           placeholder={"Пароль"}
@@ -82,7 +138,7 @@ export const Login = ({ navigation }) => {
           value={passwordValue}
         />
         <Button
-          text="Войти"
+          text="Зарегистрироваться"
           color={COLORS.LIGHT_PURPLE}
           colorOnPress={COLORS.DARK_PURPLE}
           onPress={signUpHandler}
@@ -90,13 +146,13 @@ export const Login = ({ navigation }) => {
           disabled={isLoading ? true : false}
         />
         <TouchableOpacity
-          onPress={() => navigation.navigate("Регистрация")}
+          onPress={() => {
+            navigation.goBack();
+          }}
           disabled={isLoading ? true : false}
         >
           <View style={{ alignItems: "center", marginTop: 10 }}>
-            <Text style={{ color: "#A339B2", fontSize: 16 }}>
-              Зарегистрироваться
-            </Text>
+            <Text style={{ color: "#A339B2", fontSize: 16 }}>Войти</Text>
           </View>
         </TouchableOpacity>
       </View>

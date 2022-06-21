@@ -8,14 +8,15 @@ const Switcher = ({
   option1,
   option2,
   onSelectSwitch,
-  selectionColor
+  selectionColor,
+  propsButtons
 }) => {
   const [getSelectionMode, setSelectionMode] = useState(selectionMode);
   const [getRoundCorner, setRoundCorner] = useState(roundCorner);
  
   const updatedSwitchData = val => {
     setSelectionMode(val);
-    //onSelectSwitch(val);
+    onSelectSwitch(val);
   };
  
   return (
@@ -34,7 +35,7 @@ const Switcher = ({
         }}>
         <TouchableOpacity
           activeOpacity={1}
-          onPress={() => updatedSwitchData(1)}
+          onPress={() => {updatedSwitchData(1)}}
           style={{
             flex: 1,
  

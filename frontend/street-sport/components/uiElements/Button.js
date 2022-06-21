@@ -1,9 +1,11 @@
 import React from "react";
-import { StyleSheet, Pressable, Text } from "react-native";
+import { StyleSheet, Pressable, Text, ActivityIndicator } from "react-native";
 
 const Button = (props) => {
+  
   return (
     <Pressable
+      disabled={props.disabled}
       onPress={props.onPress}
       style={({ pressed }) => [
         {
@@ -12,14 +14,18 @@ const Button = (props) => {
         styles.button,
       ]}
     >
-      <Text
-        style={[
-          { color: props.textColor == null ? "#fff" : props.textColor },
-          styles.buttonText,
-        ]}
-      >
-        {props.text}
-      </Text>
+      {props.isLoading ? (
+        <ActivityIndicator size="small" color="white" />
+      ) : (
+        <Text
+          style={[
+            { color: props.textColor == null ? "#fff" : props.textColor },
+            styles.buttonText,
+          ]}
+        >
+          {props.text}
+        </Text>
+      )}
     </Pressable>
   );
 };
