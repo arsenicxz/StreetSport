@@ -1,0 +1,13 @@
+export default {
+    BACKGROUND_GRAY: '#F3F3F3',
+    BLACK: '#000000',
+    ALMOST_BLACK: '#717171',
+    BORDER_GRAY: '#D1D1D1',
+
+    HIGHLIGHT_GRAY: '#656565',
+
+    LIGHT_PURPLE: '#BF80FF',
+    DARK_PURPLE: '#A142FF'
+};
+
+

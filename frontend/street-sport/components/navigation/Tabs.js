@@ -4,6 +4,7 @@ import reactDom from 'react-dom';
 import { CreateGameScreen } from '../screens/CreateGameScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { SearchScreen } from '../screens/SearchScreen';
+import COLORS from "../../assets/colors";
 
 const Tab = createBottomTabNavigator();
 
@@ -15,9 +16,7 @@ const Tabs = () =>{
                 "tabBarShowLabel":false,
                 "tabBarStyle":[
                     {
-                        // "position":"absolute",
                         "bottom": 0,
-                        // "borderRadius": 20,
                         "borderBottomLeftRadius":0,
                         "borderBottomRightRadius":0,
                         "height": 80,
@@ -38,7 +37,7 @@ const Tabs = () =>{
                         width: 82,
                         height: 64,
                         borderRadius: 16,
-                        backgroundColor: focused ? '#e9e9e9' : '#fff'
+                        backgroundColor: focused ? (COLORS.BACKGROUND_GRAY) : (null)
                     }}>
                         <Image 
                             source={require('../../assets/icons/search.png')}
@@ -61,7 +60,7 @@ const Tabs = () =>{
                         width: 82,
                         height: 64,
                         borderRadius: 16,
-                        backgroundColor: focused ? '#e9e9e9' : '#fff'
+                        backgroundColor: focused ? (COLORS.BACKGROUND_GRAY) : (null)
                     }}>
                         <Image 
                             source={require('../../assets/icons/create.png')}
@@ -84,7 +83,7 @@ const Tabs = () =>{
                         width: 82,
                         height: 64,
                         borderRadius: 16,
-                        backgroundColor: focused ? '#e9e9e9' : '#fff'
+                        backgroundColor: focused ? (COLORS.BACKGROUND_GRAY) : (null)
                     }}>
                         <Image 
                             source={require('../../assets/icons/profile.png')}
