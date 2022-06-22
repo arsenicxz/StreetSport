@@ -89,7 +89,7 @@ public class DataBase {
                             String mail,
                             String password) {
         try {
-            String query = "UPDATE user SET username = ?, telephone = ?," +
+            String query = "UPDATE user SET username = ?, telephone = ?, " +
                     "mail = ?, password = ? WHERE id = ?";
             PreparedStatement prSt = dbConnection.prepareStatement(query);
             prSt.setString(1, username);
@@ -121,25 +121,33 @@ public class DataBase {
 
     //выбор интересующих игр
     //страничка - мои игры
-    public String UserGames (int userid, int gametypeid) {
+    public boolean EditUserGames (int userid, int gametypeid) {
         try {
-            /*String query ="INSERT INTO usergamelike" +
-                    "(userid, gametypeid)" +
-                    "VALUES (?,?)";
-            PreparedStatement prSt = dbConnection.prepareStatement(query);
-            prSt.setInt(1, userid);
-            prSt.setInt(2, gametypeid);
-            return "Success\n";*/
-            String query = "INSERT INTO usergamelike" +
+            String query = "INSERT INTO usergamelike " +
                     "(userid, gametypeid) VALUES (?,?) ";
             PreparedStatement prSt = dbConnection.prepareStatement(query);
             prSt.setInt(1, userid);
             prSt.setInt(2, gametypeid);
-            return "Success\n";
+            return true;
         }
-        catch (SQLException e) {
+         catch(SQLException e) {
             e.printStackTrace();
-            return "Error\n";
+            return false;
+        }
+    }
+
+    //показать виды спорта пользователя
+    public boolean ShowUserGames (int userid) {
+        try {
+            String query = "SELECT gametypeid FROM usergamelike " +
+                    "WHERE userid = ? ";
+            PreparedStatement prSt = dbConnection.prepareStatement(query);
+            prSt.setInt(1, userid);
+            //prSt.setInt(2, gametypeid);
+            return true;
+        } catch(SQLException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
@@ -152,11 +160,10 @@ public class DataBase {
                             Point location) {
 
         try {
-            String query = "INSERT INTO couching" +
-                    "(couchingid, gametypeid, tournamentid, date, time," +
-                    "played, rating, duration, achievment, creatorcouching, location)" +
-                    "VALUES" +
-                    "(?,?,?,?,?,?,?,?,?,?,?)";
+            String query = "INSERT INTO couching " +
+                    "(couchingid, gametypeid, tournamentid, date, time, " +
+                    "played, rating, duration, achievment, creatorcouching, location) " +
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
             PreparedStatement prSt = dbConnection.prepareStatement(query);
             //1 - user id - продумать, как присваивать по порядку
             prSt.setInt(1, couchingid);

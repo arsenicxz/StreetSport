@@ -33,6 +33,8 @@ public class Server {
         _server.createContext("/reg", new NewUserHandler());
         _server.createContext("/delete", new DeleteUserHandler());
         _server.createContext("/edit", new EditUserHandler());
+        _server.createContext("/showusergames", new ShowUserGamesHandler());
+        _server.createContext("/editusergames", new EditUserGamesHandler());
 
         _server.setExecutor(null);
     }
@@ -304,6 +306,104 @@ public class Server {
                     } else {
                         answer.put("answer", "error 1!!!");
                         result = answer.toJSONString();
+                    }
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            return result;
+        }
+    }
+
+    public static class ShowUserGamesHandler extends MyHttpHandler {
+        DataBase _dataBase;
+        @Override
+        public int HandleHtml(String request, StringBuilder answer, String request_url) {
+            try {
+                _dataBase = new DataBase();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.println(request);
+            String obrabotka = ParceRequest(request);
+            System.out.println(obrabotka);
+            answer.append(obrabotka);
+            return 200;
+        }
+
+        private String ParceRequest (String request) {
+            JSONObject answer = new JSONObject();
+            answer.put("answer", "server error!");
+            String result = answer.toJSONString();
+            try {
+                Object obj = new JSONParser().parse(request);
+                JSONObject req = (JSONObject) obj;
+                String mod = (String) req.get("mod");
+
+                if (mod.contains("ShowUserGames")) {
+                    String id = (String) req.get("userid");
+                    int userid = Integer.parseInt(id);
+
+                    if (_dataBase.ShowUserGames(userid)) {
+                        answer.put("answer", "user games were shown");
+                        result = answer.toJSONString();
+                        //return result;
+                    } else {
+                        answer.put("answer", "error 1!!!");
+                        result = answer.toJSONString();
+                        //return result;
+                    }
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            return result;
+        }
+    }
+
+    public static class EditUserGamesHandler extends MyHttpHandler {
+        DataBase _dataBase;
+        @Override
+        public int HandleHtml(String request, StringBuilder answer, String request_url) {
+            try {
+                _dataBase = new DataBase();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.println(request);
+            String obrabotka = ParceRequest(request);
+            System.out.println(obrabotka);
+            answer.append(obrabotka);
+            return 200;
+        }
+
+        private String ParceRequest (String request) {
+            JSONObject answer = new JSONObject();
+            answer.put("answer", "server error!");
+            String result = answer.toJSONString();
+            try {
+                Object obj = new JSONParser().parse(request);
+                JSONObject req = (JSONObject) obj;
+                String mod = (String) req.get("mod");
+
+                if (mod.contains("EditUserGames")) {
+                    String id = (String) req.get("userid");
+                    int userid = Integer.parseInt(id);
+                    String gameid = (String) req.get("gametypeid");
+                    int gametypeid = Integer.parseInt(gameid);
+
+                    if (_dataBase.EditUserGames(userid, gametypeid)) {
+                        answer.put("answer", "user games were edited");
+                        result = answer.toJSONString();
+                        //return result;
+                    } else {
+                        answer.put("answer", "error 1!!!");
+                        result = answer.toJSONString();
+                        //return result;
                     }
                 }
             } catch (ParseException e) {
