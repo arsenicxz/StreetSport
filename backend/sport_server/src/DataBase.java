@@ -1,3 +1,7 @@
+import jdk.javadoc.doclet.Taglet;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,36 +31,40 @@ public class DataBase {
     }
 
     //проверка авторизованности пользователя
-    public boolean CheckUserAuth (String login, String password) {
+    public String CheckUserAuth (String login, String password) {
         if (login.contains("@")) {
-            String query = "SELECT mail, password FROM user " +
+            String query = "SELECT userid, mail, password FROM user " +
                     "WHERE mail = '" + login + "' AND password = '" + password + "'";
             try {
                 PreparedStatement prSt = dbConnection.prepareStatement(query);
                 ResultSet result =  prSt.executeQuery();
                 if(result.next()) {
-                    return true;
+                    String id = result.getString(1);
+                    System.out.println(id);
+                    return id;
                 }
-                return false;
+                return "-1";
             }
             catch (SQLException e) {
                 e.printStackTrace();
-                return false;
+                return "-1";
             }
         } else {
-            String query = "SELECT telephone, password FROM user " +
+            String query = "SELECT userid, telephone, password FROM user " +
                     "WHERE telephone = '" + login + "' AND password = '" + password + "'";
             try {
                 PreparedStatement prSt = dbConnection.prepareStatement(query);
                 ResultSet result =  prSt.executeQuery();
                 if(result.next()) {
-                    return true;
+                    String id = result.getString(1);
+                    System.out.println(id);
+                    return id;
                 }
-                return false;
+                return "-1";
             }
             catch (SQLException e) {
                 e.printStackTrace();
-                return false;
+                return "-1";
             }
         }
     }
@@ -152,20 +160,19 @@ public class DataBase {
     }
 
     //создание игры
-    public String Couching (int couchingid, int gametypeid,
+    public boolean Couching (int couchingid, int gametypeid,
                             int tournamentid, LocalDate date,
                             Time time, int played,
                             int rating, Time duration,
                             int achievment, String creatorcouching,
-                            Point location) {
+                            double latitude, double longitude) {
 
         try {
             String query = "INSERT INTO couching " +
                     "(couchingid, gametypeid, tournamentid, date, time, " +
-                    "played, rating, duration, achievment, creatorcouching, location) " +
-                    "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+                    "played, rating, duration, achievment, creatorcouching, latitude, longitude) " +
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
             PreparedStatement prSt = dbConnection.prepareStatement(query);
-            //1 - user id - продумать, как присваивать по порядку
             prSt.setInt(1, couchingid);
             prSt.setInt(2, gametypeid);
             prSt.setInt(3, tournamentid);
@@ -176,13 +183,76 @@ public class DataBase {
             prSt.setTime(8, duration);
             prSt.setInt(9, achievment);
             prSt.setString(10, creatorcouching);
-            //prSt.set location???
-
-            return "Success\n";
-        }
-        catch (SQLException e) {
+            prSt.setDouble(11, latitude);
+            prSt.setDouble(12, longitude);
+            return true;
+        } catch (SQLException e) {
             e.printStackTrace();
-            return "Error\n";
+            return false;
+        }
+    }
+
+    //рейтинг по итогу игры
+    public boolean GameEnding (int couchingid, int played, int achievment) {
+        try {
+            String query = "INSERT INTO couching " +
+                    "(played, achievment) VALUES (?,?) WHERE couchingid = ? ";
+            PreparedStatement prSt = dbConnection.prepareStatement(query);
+            prSt.setInt(1, played);
+            prSt.setInt(2, achievment);
+
+            return  true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public String SearchGames (int gametypeid, LocalDate date) {
+        String query = "SELECT * FROM couching " +
+                "WHERE gametypeid = '" + gametypeid + "' AND date = '" + date + "'";
+        try {
+            PreparedStatement prSt = dbConnection.prepareStatement(query);
+            ResultSet result =  prSt.executeQuery();
+            JSONArray list = new JSONArray();
+
+            while(result.next()) {
+
+                String couchingid = result.getString(1);
+                System.out.println(couchingid);
+                //String gametypeid = result.getString(2);
+                String tournametid = result.getString(3);
+                System.out.println(tournametid);
+                //String date = result.getString(4);
+                String time = result.getString(5);
+                System.out.println(time);
+
+                String duration = result.getString(8);
+                System.out.println(duration);
+
+                String latitude = result.getString(11);
+                System.out.println(latitude);
+
+                String longitude = result.getString(12);
+                System.out.println(longitude);
+
+                JSONObject resultJSON = new JSONObject();
+
+                resultJSON.put("couchingid", couchingid);
+                resultJSON.put("tournametid", tournametid);
+                resultJSON.put("time", time);
+                resultJSON.put("duration", duration);
+                resultJSON.put("latitude", latitude);
+                resultJSON.put("longitude", longitude);
+
+                list.add(resultJSON);
+            }
+                return list.toJSONString();
+
+            //return "-1";
+        } catch(SQLException e) {
+            e.printStackTrace();
+            return "-1";
         }
     }
 

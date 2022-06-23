@@ -13,6 +13,7 @@ import java.net.URLDecoder;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.sql.SQLException;
+import java.time.LocalDate;
 
 public class Server {
     //сервер
@@ -35,6 +36,8 @@ public class Server {
         _server.createContext("/edit", new EditUserHandler());
         _server.createContext("/showusergames", new ShowUserGamesHandler());
         _server.createContext("/editusergames", new EditUserGamesHandler());
+
+        _server.createContext("/searchgames", new SearchGamesHandler());
 
         _server.setExecutor(null);
     }
@@ -116,7 +119,8 @@ public class Server {
 
         private String ParceRequest (String request) {
             JSONObject answer = new JSONObject();
-            answer.put("answer", "server error!");
+            answer.put("requestID", "0");
+            answer.put("answer", "server error kapez");
             String result = answer.toJSONString();
             try {
                 Object obj = new JSONParser().parse(request);
@@ -127,13 +131,15 @@ public class Server {
                     String login = (String) req.get("login");
                     String password = (String) req.get("password");
                     System.out.println("user: " + login + " " + password);
-
-                    if (_dataBase.CheckUserAuth(login, password)) {
-                        answer.put("answer", "user login in");
+                    String resultDataBase =_dataBase.CheckUserAuth(login, password);
+                    if ( resultDataBase != ("-1")) {
+                        answer.put("requestID", "1");
+                        answer.put("answer", resultDataBase);
                         result = answer.toJSONString();
                         //return result;
                     } else {
-                        answer.put("answer", "error 1!!!");
+                        answer.put("requestID", "0");
+                        answer.put("answer", "error pipez");
                         result = answer.toJSONString();
                         //return result;
                     }
@@ -143,25 +149,6 @@ public class Server {
             }
             return result;
         }
-
-        /*private String ParceRequest (String request) {
-            String[] subs = request.split("&");
-            if (subs[0].contains("CheckUserAuth")) {
-                String login = subs[1].split("=")[1];
-                String password = subs[2].split("=")[2];
-                if (login != null && password != null && !login.equals("") && !password.equals("")) {
-                    if (_dataBase.CheckUserAuth(login, password)) {
-                        return "user authed";
-                    } else {
-                        return "Error1";
-                    }
-                } else {
-                    return "Error2";
-                }
-            } else {
-                return "Error3";
-            }
-        }*/
     }
 
     //регистрация пользователя
@@ -349,11 +336,9 @@ public class Server {
                     if (_dataBase.ShowUserGames(userid)) {
                         answer.put("answer", "user games were shown");
                         result = answer.toJSONString();
-                        //return result;
                     } else {
                         answer.put("answer", "error 1!!!");
                         result = answer.toJSONString();
-                        //return result;
                     }
                 }
             } catch (ParseException e) {
@@ -399,11 +384,9 @@ public class Server {
                     if (_dataBase.EditUserGames(userid, gametypeid)) {
                         answer.put("answer", "user games were edited");
                         result = answer.toJSONString();
-                        //return result;
                     } else {
                         answer.put("answer", "error 1!!!");
                         result = answer.toJSONString();
-                        //return result;
                     }
                 }
             } catch (ParseException e) {
@@ -413,4 +396,70 @@ public class Server {
         }
     }
 
+        /*private String ParceRequest (String request) {
+            String[] subs = request.split("&");
+            if (subs[0].contains("CheckUserAuth")) {
+                String login = subs[1].split("=")[1];
+                String password = subs[2].split("=")[2];
+                if (login != null && password != null && !login.equals("") && !password.equals("")) {
+                    if (_dataBase.CheckUserAuth(login, password)) {
+                        return "user authed";
+                    } else {
+                        return "Error1";
+                    }
+                } else {
+                    return "Error2";
+                }
+            } else {
+                return "Error3";
+            }
+        }*/
+
+    public static class SearchGamesHandler extends MyHttpHandler {
+        DataBase _dataBase;
+        @Override
+        public int HandleHtml(String request, StringBuilder answer, String request_url) {
+            try {
+                _dataBase = new DataBase();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.println(request);
+            String obrabotka = ParceRequest(request);
+            System.out.println(obrabotka);
+            answer.append(obrabotka);
+            return 200;
+        }
+
+        private String ParceRequest (String request) {
+            JSONObject answer = new JSONObject();
+            answer.put("answer", "server error!");
+            String result = answer.toJSONString();
+            try {
+                Object obj = new JSONParser().parse(request);
+                JSONObject req = (JSONObject) obj;
+                String mod = (String) req.get("mod");
+
+                if (mod.contains("SearchGames")) {
+                    String game = (String) req.get("gametypeid");
+                    int gametypeid = Integer.parseInt(game);
+                    String dt = (String) req.get("date");
+                    LocalDate date = LocalDate.parse(dt);
+                    String resultDataBase =_dataBase.SearchGames(gametypeid, date);
+                    if (resultDataBase!="-1") {
+                        answer.put("answer", "games");
+                        result = resultDataBase;
+                    } else {
+                        answer.put("answer", "null games");
+                        result = answer.toJSONString();
+                    }
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            return result;
+        }
+    }
 }
