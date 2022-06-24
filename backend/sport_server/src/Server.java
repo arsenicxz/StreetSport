@@ -30,14 +30,16 @@ public class Server {
                 return 0;
             }
         });
-        _server.createContext("/login", new LoginHandler());
-        _server.createContext("/reg", new NewUserHandler());
-        _server.createContext("/delete", new DeleteUserHandler());
-        _server.createContext("/edit", new EditUserHandler());
-        _server.createContext("/showusergames", new ShowUserGamesHandler());
-        _server.createContext("/editusergames", new EditUserGamesHandler());
 
-        _server.createContext("/searchgames", new SearchGamesHandler());
+        _server.createContext("/login", new LoginHandler()); //вход
+        _server.createContext("/reg", new NewUserHandler()); //регистрация
+        _server.createContext("/delete", new DeleteUserHandler()); //удаление профиля
+        _server.createContext("/edit", new EditUserHandler()); //редактирование профиля
+        _server.createContext("/showusergames", new ShowUserGamesHandler()); //показать игры в профиле
+        _server.createContext("/editusergames", new EditUserGamesHandler()); //редактировать игры в профиле
+        _server.createContext("/searchgames", new SearchGamesHandler()); //поиск игры
+        _server.createContext("/showalltypes", new ShowAllTypes()); //показать все виды игр
+
 
         _server.setExecutor(null);
     }
@@ -448,6 +450,50 @@ public class Server {
                     String dt = (String) req.get("date");
                     LocalDate date = LocalDate.parse(dt);
                     String resultDataBase =_dataBase.SearchGames(gametypeid, date);
+                    if (resultDataBase!="-1") {
+                        answer.put("answer", "games");
+                        result = resultDataBase;
+                    } else {
+                        answer.put("answer", "null games");
+                        result = answer.toJSONString();
+                    }
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            return result;
+        }
+    }
+
+    public static class ShowAllTypes extends MyHttpHandler {
+        DataBase _dataBase;
+        @Override
+        public int HandleHtml(String request, StringBuilder answer, String request_url) {
+            try {
+                _dataBase = new DataBase();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.println(request);
+            String obrabotka = ParceRequest(request);
+            System.out.println(obrabotka);
+            answer.append(obrabotka);
+            return 200;
+        }
+
+        private String ParceRequest (String request) {
+            JSONObject answer = new JSONObject();
+            answer.put("answer", "server error!");
+            String result = answer.toJSONString();
+            try {
+                Object obj = new JSONParser().parse(request);
+                JSONObject req = (JSONObject) obj;
+                String mod = (String) req.get("mod");
+
+                if (mod.contains("ShowAllTypes")) {
+                    String resultDataBase =_dataBase.ShowAllTypes();
                     if (resultDataBase!="-1") {
                         answer.put("answer", "games");
                         result = resultDataBase;

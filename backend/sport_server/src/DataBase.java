@@ -208,6 +208,7 @@ public class DataBase {
         }
     }
 
+    //поиск игр
     public String SearchGames (int gametypeid, LocalDate date) {
         String query = "SELECT * FROM couching " +
                 "WHERE gametypeid = '" + gametypeid + "' AND date = '" + date + "'";
@@ -217,39 +218,54 @@ public class DataBase {
             JSONArray list = new JSONArray();
 
             while(result.next()) {
-
                 String couchingid = result.getString(1);
                 System.out.println(couchingid);
-                //String gametypeid = result.getString(2);
                 String tournametid = result.getString(3);
                 System.out.println(tournametid);
-                //String date = result.getString(4);
                 String time = result.getString(5);
                 System.out.println(time);
-
                 String duration = result.getString(8);
                 System.out.println(duration);
-
                 String latitude = result.getString(11);
                 System.out.println(latitude);
-
                 String longitude = result.getString(12);
                 System.out.println(longitude);
 
                 JSONObject resultJSON = new JSONObject();
-
                 resultJSON.put("couchingid", couchingid);
                 resultJSON.put("tournametid", tournametid);
                 resultJSON.put("time", time);
                 resultJSON.put("duration", duration);
                 resultJSON.put("latitude", latitude);
                 resultJSON.put("longitude", longitude);
-
                 list.add(resultJSON);
             }
                 return list.toJSONString();
+        } catch(SQLException e) {
+            e.printStackTrace();
+            return "-1";
+        }
+    }
 
-            //return "-1";
+    public String ShowAllTypes () {
+        try {
+            String query = "SELECT * FROM gametype";
+            PreparedStatement prSt = dbConnection.prepareStatement(query);
+            ResultSet result =  prSt.executeQuery();
+            JSONArray list = new JSONArray();
+
+            while (result.next()) {
+                String gametypeid = result.getString(1);
+                System.out.println(gametypeid);
+                String gametypename = result.getString(2);
+                System.out.println(gametypename);
+
+                JSONObject resultJSON = new JSONObject();
+                resultJSON.put("gametypeid", gametypeid);
+                resultJSON.put("gametypename", gametypename);
+                list.add(resultJSON);
+            }
+            return list.toJSONString();
         } catch(SQLException e) {
             e.printStackTrace();
             return "-1";
