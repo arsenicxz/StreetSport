@@ -9,25 +9,30 @@ import {
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Button from "./Button";
-import * as COLORS from "../../assets/colors";
+import COLORS from "../../assets/colors";
 
-const DatePicker = ({}) => {
+const DatePicker = (props) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const [date, setDate] = useState(new Date());
+
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const [prevDate, setPrevDate] = useState(new Date());
 
   const onChangeDate = (event, selectedDate) => {
     const currentDate = selectedDate;
+    props.getDate(selectedDate);
     setShowDatePicker(false);
     setDate(currentDate);
+    
   };
 
   const backToPreviousDate = () => {
     setDate(prevDate);
+    props.getDate(prevDate);
     setModalVisible(!modalVisible);
+    
   };
 
   const showDateMode = (currentMode) => {
@@ -91,7 +96,7 @@ const DatePicker = ({}) => {
                       text="ОК"
                       color={COLORS.LIGHT_PURPLE}
                       colorOnPress={COLORS.DARK_PURPLE}
-                      onPress={()=>setModalVisible(!modalVisible)}
+                      onPress={() => setModalVisible(!modalVisible)}
                     />
                   </View>
                   {/* <TouchableOpacity
@@ -107,13 +112,13 @@ const DatePicker = ({}) => {
                       ОК
                     </Text>
                   </TouchableOpacity> */}
-                  <View style={{ flex: 1, marginHorizontal: 10, }}>
+                  <View style={{ flex: 1, marginHorizontal: 10 }}>
                     <Button
                       text="Отменить"
                       color={COLORS.BACKGROUND_GRAY}
                       colorOnPress={COLORS.HIGHLIGHT_GRAY}
                       textColor={COLORS.BLACK}
-                      onPress={()=>backToPreviousDate()}
+                      onPress={() => backToPreviousDate()}
                     />
                   </View>
                 </View>

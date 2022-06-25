@@ -37,8 +37,9 @@ export const Login = ({ navigation }) => {
       await dispatch(authActions.signin(emailValue, passwordValue));
     } catch (err) {
       setError(err.message);
+      setIsLoading(false);
     }
-    setIsLoading(false);
+    
   };
 
   useEffect(() => {

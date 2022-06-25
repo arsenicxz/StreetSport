@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Button from "./Button";
-import * as COLORS from "../../assets/colors";
+import COLORS from "../../assets/colors";
 
 
 const TimePicker = ({}) => {

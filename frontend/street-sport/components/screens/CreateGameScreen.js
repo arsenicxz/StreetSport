@@ -10,6 +10,8 @@ import {
   TouchableOpacity,
   Dimensions,
   Modal,
+  KeyboardAvoidingView,
+  ActivityIndicator
 } from "react-native";
 import { Marker } from "react-native-maps";
 import MapView from "react-native-maps";
@@ -19,6 +21,9 @@ import TimePicker from "../uiElements/TimePicker";
 import Button from "../uiElements/Button";
 import COLORS from "../../assets/colors";
 import SearchWithMapModal from "../searchingOnMap/SearchWithMapModal";
+import MultiSelect from "react-native-multiple-select";
+import * as gamesActions from "../../store/actions/games";
+import { useSelector, useDispatch } from "react-redux";
 
 export const CreateGameScreen = (props) => {
   const [latitudeState, setLatitude] = useState(37.425);
@@ -26,6 +31,12 @@ export const CreateGameScreen = (props) => {
   const [address, setAddress] = useState("");
 
   const [modalVisible, setModalVisible] = useState(false);
+  const [modalGame, setModalGame] = useState(false);
+
+  const [selected, setSelected] = useState([]);
+  const onSelectedItemsChange = (selectedItems) => {
+    setSelected(selectedItems);
+  };
 
   const closeModalMap = () => {
     setModalVisible(false);
@@ -48,6 +59,24 @@ export const CreateGameScreen = (props) => {
     setModalVisible(false);
   };
 
+  //для поля "во что играем"
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState();
+
+  const dispatch = useDispatch();
+  const gamesButtonHandler = async () => {
+    setError(null);
+    setIsLoading(true);
+    try {
+      await dispatch(gamesActions.getgames());
+    } catch (err) {
+      setError(err.message);
+    }
+    setIsLoading(false);
+  };
+
+  const games = useSelector((state) => state.games.games);
+  //-------------------------
 
   return (
     <SafeAreaView style={styles.container}>
@@ -81,8 +110,96 @@ export const CreateGameScreen = (props) => {
 
           <View style={styles.contentInfo}>
             <Text style={styles.contentInfoH2}>во что играем</Text>
-            <TextInput style={styles.input} placeholder={"Игра..."} />
-            
+
+            <Modal
+              animationType="fade"
+              transparent={true}
+              visible={modalGame}
+              onRequestClose={() => {
+                setModalVisible(!modalGame);
+              }}
+            >
+              <View
+                style={{
+                  flex: 1,
+                  backgroundColor: "rgba(0,0,0,0.4)",
+                  justifyContent: "flex-end",
+                  alignItems: "center",
+                }}
+              >
+                <View style={styles.modalView}>
+                  {isLoading ? (
+                    <View
+                      style={{
+                        height: 120,
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <ActivityIndicator
+                        size="large"
+                        color={COLORS.LIGHT_PURPLE}
+                      />
+                    </View>
+                  ) : (
+                    <View>
+                      <MultiSelect
+                        single
+                        items={games}
+                        uniqueKey="gametypeid"
+                        displayKey="gametypename"
+                        onSelectedItemsChange={onSelectedItemsChange}
+                        selectedItems={selected}
+                        selectText="Выберите игры"
+                        searchInputPlaceholderText="Поиск..."
+                        onChangeInput={(text) => console.log(text)}
+                        tagRemoveIconColor="#BF80FF"
+                        tagBorderColor="#BF80FF"
+                        tagTextColor="#BF80FF"
+                        itemTextColor="#000"
+                        searchInputStyle={{ color: "#CCC" }}
+                        submitButtonColor="#BF80FF"
+                        submitButtonText="Подтвердить"
+                        selectedItemTextColor="#BF80FF"
+                        selectedItemIconColor="#BF80FF"
+                        styleTextDropdown={{ paddingLeft: 20 }}
+                        styleTextDropdownSelected={{ paddingLeft: 20 }}
+                        styleMainWrapper={{
+                          borderRadius: 10,
+                          borderWidth: 1,
+                          borderColor: COLORS.BORDER_GRAY,
+                          overflow: "hidden",
+                        }}
+                        styleItemsContainer={{ height: 250 }}
+                        //styleSelectorContainer={{}}
+                      />
+                      <Button
+                        text="Закрыть окно изменений"
+                        color={COLORS.BACKGROUND_GRAY}
+                        colorOnPress={COLORS.ALMOST_BLACK}
+                        textColor={COLORS.BLACK}
+                        onPress={() => {
+                          setModalGame(!modalGame);
+                          
+                        }}
+                      />
+                    </View>
+                  )}
+                </View>
+              </View>
+            </Modal>
+
+            <TouchableOpacity
+              style={styles.input}
+              onPress={() => {setModalGame(true);gamesButtonHandler()}}
+            >
+              <Text style={{ color: COLORS.ALMOST_BLACK }} numberOfLines={1}>
+                {selected == ""
+                  ? "Выберите игру..."
+                  : "Изменить выбранное: " +
+                    games.find((el) => el.gametypeid == selected).gametypename}
+              </Text>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.contentInfo}>
@@ -116,7 +233,6 @@ export const CreateGameScreen = (props) => {
                 onConfirmButton={getAddressFromSearch}
               />
             </Modal>
-
           </View>
 
           <View style={styles.contentInfo}>
@@ -153,8 +269,6 @@ export const CreateGameScreen = (props) => {
     </SafeAreaView>
   );
 };
-
-
 
 const styles = StyleSheet.create({
   container: {
@@ -197,7 +311,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#D1D1D1",
     backgroundColor: "#F9F9F9",
-    alignItems: "center",
+    alignItems: "flex-start",
     justifyContent: "center",
     marginVertical: 5,
   },
@@ -226,5 +340,19 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: "#D1D1D1",
   },
+  modalView: {
+    width: "95%",
+    bottom: 25,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 12,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 5,
+  },
 });
-
