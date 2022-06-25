@@ -40,7 +40,6 @@ public class Server {
         _server.createContext("/searchgames", new SearchGamesHandler()); //поиск игры
         _server.createContext("/showalltypes", new ShowAllTypes()); //показать все виды игр
 
-
         _server.setExecutor(null);
     }
 
@@ -52,7 +51,6 @@ public class Server {
     //хендлер для принятия запросов на сервер
     abstract static class MyHttpHandler implements HttpHandler {
 
-        //public abstract int HandleHtml(String request, StringBuilder answer, String request_url);
         public abstract int HandleHtml(String request, StringBuilder answer, String request_url);
 
         public void handle (HttpExchange t) throws IOException {
@@ -304,6 +302,7 @@ public class Server {
         }
     }
 
+    //показать виды спорта пользователя
     public static class ShowUserGamesHandler extends MyHttpHandler {
         DataBase _dataBase;
         @Override
@@ -350,6 +349,7 @@ public class Server {
         }
     }
 
+    //редактирование видов спорта пользователя
     public static class EditUserGamesHandler extends MyHttpHandler {
         DataBase _dataBase;
         @Override
@@ -398,25 +398,7 @@ public class Server {
         }
     }
 
-        /*private String ParceRequest (String request) {
-            String[] subs = request.split("&");
-            if (subs[0].contains("CheckUserAuth")) {
-                String login = subs[1].split("=")[1];
-                String password = subs[2].split("=")[2];
-                if (login != null && password != null && !login.equals("") && !password.equals("")) {
-                    if (_dataBase.CheckUserAuth(login, password)) {
-                        return "user authed";
-                    } else {
-                        return "Error1";
-                    }
-                } else {
-                    return "Error2";
-                }
-            } else {
-                return "Error3";
-            }
-        }*/
-
+    //поиск игры
     public static class SearchGamesHandler extends MyHttpHandler {
         DataBase _dataBase;
         @Override
@@ -465,6 +447,7 @@ public class Server {
         }
     }
 
+    //отображение всего списка видов спорта
     public static class ShowAllTypes extends MyHttpHandler {
         DataBase _dataBase;
         @Override

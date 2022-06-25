@@ -151,7 +151,6 @@ public class DataBase {
                     "WHERE userid = ? ";
             PreparedStatement prSt = dbConnection.prepareStatement(query);
             prSt.setInt(1, userid);
-            //prSt.setInt(2, gametypeid);
             return true;
         } catch(SQLException e) {
             e.printStackTrace();
@@ -200,7 +199,6 @@ public class DataBase {
             PreparedStatement prSt = dbConnection.prepareStatement(query);
             prSt.setInt(1, played);
             prSt.setInt(2, achievment);
-
             return  true;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -247,6 +245,7 @@ public class DataBase {
         }
     }
 
+    //показать весь список видов спорта
     public String ShowAllTypes () {
         try {
             String query = "SELECT * FROM gametype";
@@ -271,5 +270,4 @@ public class DataBase {
             return "-1";
         }
     }
-
 }
