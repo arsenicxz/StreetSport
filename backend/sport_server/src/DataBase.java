@@ -2,13 +2,13 @@ import jdk.javadoc.doclet.Taglet;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.*;
 import java.time.LocalDate;
+import java.util.Objects;
 import java.util.Properties;
 
 public class DataBase {
@@ -71,18 +71,23 @@ public class DataBase {
 
     //добавление/создание профиля пользователя
     public boolean NewUser(String username,
-                          String telephone,
-                          String mail,
-                          String password) {
+                           String telephone,
+                           String mail,
+                           String password) {
+        if(Objects.equals(telephone, "") && Objects.equals(mail, "")){
+            return false;
+        }
         try {
             String query = "INSERT INTO user (username, telephone, mail, password) " +
-                    "VALUES (?,?,?,?)";
+                    "VALUES ('" + username + "','"+ telephone +"','"+ mail +"','"+ password +"')";
             PreparedStatement prSt = dbConnection.prepareStatement(query);
-            prSt.setString(1, username);
-            prSt.setString(2, telephone);
-            prSt.setString(3, mail);
-            prSt.setString(4, password);
-            return true;
+            boolean res = prSt.execute(query);
+            System.out.println(res);
+            if(res){
+                return true;
+            }else{
+                return true;
+            }
         }
         catch (SQLException e) {
             e.printStackTrace();
@@ -97,13 +102,11 @@ public class DataBase {
                             String mail,
                             String password) {
         try {
-            String query = "UPDATE user SET username = ?, telephone = ?, " +
-                    "mail = ?, password = ? WHERE id = ?";
+            String query = "UPDATE user SET username = '"+username+"', telephone = '"+telephone+"', " +
+                    "mail = '"+mail+"', password = '"+password+"' WHERE id = '"+userid+"'";
             PreparedStatement prSt = dbConnection.prepareStatement(query);
-            prSt.setString(1, username);
-            prSt.setString(2, telephone);
-            prSt.setString(3, mail);
-            prSt.setString(4, password);
+            boolean res = prSt.execute(query);
+            System.out.println(res);
             return true;
         }
         catch (SQLException e) {
@@ -114,11 +117,11 @@ public class DataBase {
 
     //удалить профиль пользователя
     public boolean DeleteUser (int userid) {
-        String query = "DELETE FROM user WHERE id = ?";
+        String query = "DELETE FROM user WHERE id = '"+userid+"'";
         try {
             PreparedStatement prSt = dbConnection.prepareStatement(query);
-            prSt.setInt(1, userid);
-            prSt.execute();
+            boolean res = prSt.execute(query);
+            System.out.println(res);
             return true;
         }
         catch (SQLException e) {
@@ -132,10 +135,10 @@ public class DataBase {
     public boolean EditUserGames (int userid, int gametypeid) {
         try {
             String query = "INSERT INTO usergamelike " +
-                    "(userid, gametypeid) VALUES (?,?) ";
+                    "(userid, gametypeid) VALUES ('" + userid + "','" + gametypeid + "') ";
             PreparedStatement prSt = dbConnection.prepareStatement(query);
-            prSt.setInt(1, userid);
-            prSt.setInt(2, gametypeid);
+            boolean res = prSt.execute(query);
+            System.out.println(res);
             return true;
         }
          catch(SQLException e) {
@@ -148,9 +151,10 @@ public class DataBase {
     public boolean ShowUserGames (int userid) {
         try {
             String query = "SELECT gametypeid FROM usergamelike " +
-                    "WHERE userid = ? ";
+                    "WHERE userid = '" + userid + "' ";
             PreparedStatement prSt = dbConnection.prepareStatement(query);
-            prSt.setInt(1, userid);
+            boolean res = prSt.execute(query);
+            System.out.println(res);
             return true;
         } catch(SQLException e) {
             e.printStackTrace();
@@ -159,31 +163,20 @@ public class DataBase {
     }
 
     //создание игры
-    public boolean Couching (int couchingid, int gametypeid,
-                            int tournamentid, LocalDate date,
-                            Time time, int played,
-                            int rating, Time duration,
-                            int achievment, String creatorcouching,
-                            double latitude, double longitude) {
+    //НЕ РАБОТАЕТ КОДИРОВКА ДЛЯ АДРЕСА И ПРОФИЛЯ
+    public boolean Couching (int gametypeid, int tournamentid, LocalDate date,
+                            Time time, int rating, String creatorcouching, String address,
+                            double latitude, double longitude, int count) {
 
         try {
             String query = "INSERT INTO couching " +
-                    "(couchingid, gametypeid, tournamentid, date, time, " +
-                    "played, rating, duration, achievment, creatorcouching, latitude, longitude) " +
-                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+                    "(gametypeid, tournamentid, date, time, " +
+                    "creatorcouching, address, latitude, longitude, count) " +
+                    "VALUES ('" + gametypeid + "','" + tournamentid + "','" + date + "','" + time + "',  '"+rating+"' " +
+                    "'" + creatorcouching + "',N'"+address+"', '" + latitude + "','" + longitude + "', '"+count+"')";
             PreparedStatement prSt = dbConnection.prepareStatement(query);
-            prSt.setInt(1, couchingid);
-            prSt.setInt(2, gametypeid);
-            prSt.setInt(3, tournamentid);
-            prSt.setDate(4, Date.valueOf(date));
-            prSt.setTime(5, time);
-            prSt.setInt(6, played);//??? - по факту это ставится по итогу игры
-            prSt.setInt(7, rating);
-            prSt.setTime(8, duration);
-            prSt.setInt(9, achievment);
-            prSt.setString(10, creatorcouching);
-            prSt.setDouble(11, latitude);
-            prSt.setDouble(12, longitude);
+            boolean res = prSt.execute(query);
+            System.out.println(res);
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -191,14 +184,13 @@ public class DataBase {
         }
     }
 
-    //рейтинг по итогу игры
-    public boolean GameEnding (int couchingid, int played, int achievment) {
+    //завершение игры
+    public boolean GameEnding (int couchingid, int played) {
         try {
-            String query = "INSERT INTO couching " +
-                    "(played, achievment) VALUES (?,?) WHERE couchingid = ? ";
+            String query = "UPDATE couching SET played = '" + played + "' WHERE couchingid = '" + couchingid + "' ";
             PreparedStatement prSt = dbConnection.prepareStatement(query);
-            prSt.setInt(1, played);
-            prSt.setInt(2, achievment);
+            boolean res = prSt.execute(query);
+            System.out.println(res);
             return  true;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -207,17 +199,19 @@ public class DataBase {
     }
 
     //поиск игр
-    public String SearchGames (int gametypeid, LocalDate date) {
+    public String SearchGames (String gametypeid, LocalDate date) {
         String query = "SELECT * FROM couching " +
-                "WHERE gametypeid = '" + gametypeid + "' AND date = '" + date + "'";
+                "WHERE gametypeid IN (" + gametypeid + ") AND date = '" + date + "'";
         try {
             PreparedStatement prSt = dbConnection.prepareStatement(query);
             ResultSet result =  prSt.executeQuery();
             JSONArray list = new JSONArray();
-
+            System.out.println(query);
             while(result.next()) {
                 String couchingid = result.getString(1);
                 System.out.println(couchingid);
+                String gametype = result.getString(2);
+                System.out.println(gametype);
                 String tournametid = result.getString(3);
                 System.out.println(tournametid);
                 String time = result.getString(5);
@@ -231,6 +225,7 @@ public class DataBase {
 
                 JSONObject resultJSON = new JSONObject();
                 resultJSON.put("couchingid", couchingid);
+                resultJSON.put("gametypeid", gametype);
                 resultJSON.put("tournametid", tournametid);
                 resultJSON.put("time", time);
                 resultJSON.put("duration", duration);
@@ -238,7 +233,7 @@ public class DataBase {
                 resultJSON.put("longitude", longitude);
                 list.add(resultJSON);
             }
-                return list.toJSONString();
+            return list.toJSONString();
         } catch(SQLException e) {
             e.printStackTrace();
             return "-1";
@@ -268,6 +263,51 @@ public class DataBase {
         } catch(SQLException e) {
             e.printStackTrace();
             return "-1";
+        }
+    }
+
+    //показать профиль пользователя
+    public String ShowUserProfile (String id) {
+        int idInt = Integer.parseInt(id);
+        String query = "SELECT username, telephone, mail FROM user " +
+                "WHERE userid = '" + idInt+ "'";
+        try {
+            PreparedStatement prSt = dbConnection.prepareStatement(query);
+            ResultSet result =  prSt.executeQuery();
+            if(result.next()) {
+                String username = result.getString(1);
+                System.out.println(username);
+                String telephone = result.getString(2);
+                System.out.println(telephone);
+                String mail = result.getString(3);
+                System.out.println(mail);
+
+                JSONObject resultJSON = new JSONObject();
+                resultJSON.put("username", username);
+                resultJSON.put("telephone", telephone);
+                resultJSON.put("mail", mail);
+                return resultJSON.toJSONString();
+            }
+            return "-1";
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+            return "-1";
+        }
+    }
+
+    //подсчет записавшихся на игру
+    public boolean CountUsersOnGame (int couchingid) {
+        try {
+            String query = "UPDATE couching SET count =(count+1) WHERE couchingid = '"+couchingid+"'";
+            PreparedStatement prSt = dbConnection.prepareStatement(query);
+            boolean res = prSt.execute(query);
+            System.out.println(res);
+            return true;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 }
