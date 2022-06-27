@@ -13,6 +13,7 @@ import java.net.InetSocketAddress;
 import java.net.URLDecoder;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.time.LocalDate;
@@ -45,6 +46,7 @@ public class Server {
         _server.createContext("/play", new PlayGameHandler()); //записаться на игру
         _server.createContext("/creategame", new CreateGameHandler()); //создать игру
         _server.createContext("/gameending", new EndingGameHandler()); //окончание игры
+        _server.createContext("/showmycreatedgames", new ShowCreateGamesHandler()); //показать, созданные пользователем игры
 
         _server.setExecutor(null);
     }
@@ -658,10 +660,13 @@ public class Server {
                     int rating = Integer.parseInt(rat);
 
                     String creator = (String) req.get("creatorcouching");
+                    ByteBuffer byteBuffer1 = StandardCharsets.ISO_8859_1.encode(creator);
+                    String crutf8 = new String(byteBuffer1.array(), StandardCharsets.UTF_8);
 
                     String address = (String) req.get("address");
-                    //String adrutf8 = new String(address.getBytes(), StandardCharsets.UTF_8);
-
+                    ByteBuffer byteBuffer2 = StandardCharsets.ISO_8859_1.encode(address);
+                    String adrutf8 = new String(byteBuffer2.array(), StandardCharsets.UTF_8);
+                    System.out.println(adrutf8);
                     String latit = (String) req.get("latitude");
                     double latitude = Double.parseDouble(latit);
 
@@ -671,8 +676,11 @@ public class Server {
                     String coun = (String) req.get("count");
                     int count = Integer.parseInt(coun);
 
+                    String usrat = (String) req.get("userrating");
+                    double userrating = Double.parseDouble(usrat);
+
                     if (_dataBase.Couching(gametypeid, tournamentid, date, time,
-                            rating, creator, address, latitude, longitude, count )) {
+                            rating, crutf8, adrutf8, latitude, longitude, count, userrating )) {
                         answer.put("answer", "game was created!");
                         result = answer.toJSONString();
                     } else {
@@ -720,12 +728,60 @@ public class Server {
                     int couchingid = Integer.parseInt(id);
                     String play = (String) req.get("played");
                     int played = Integer.parseInt(play);
+                    String creator = (String) req.get("creator");
 
-                    if (_dataBase.GameEnding(couchingid, played)) {
+                    if (_dataBase.GameEnding(couchingid, played, creator)) {
                         answer.put("answer", "game was ended");
                         result = answer.toJSONString();
                     } else {
                         answer.put("answer", "null games");
+                        result = answer.toJSONString();
+                    }
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            return result;
+        }
+    }
+
+    //показать, созданные пользователем игры
+    public static class ShowCreateGamesHandler extends MyHttpHandler {
+        private DataBase _dataBase;
+        @Override
+        public int HandleHtml(String request, StringBuilder answer, String request_url) {
+            try {
+                _dataBase = new DataBase();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.println(request);
+            String obrabotka = ParceRequest(request);
+            System.out.println(obrabotka);
+            answer.append(obrabotka);
+            return 200;
+        }
+
+        private String ParceRequest (String request) {
+            JSONObject answer = new JSONObject();
+            answer.put("answer", "server error kapez");
+            String result = answer.toJSONString();
+            try {
+                Object obj = new JSONParser().parse(request);
+                JSONObject req = (JSONObject) obj;
+                String mod = (String) req.get("mod");
+
+                if (mod.contains("ShowMyCreatedGames")) {
+                    String creatorcouching = (String) req.get("creatorcouching");
+                    System.out.println("creatorcouching: " + creatorcouching);
+                    String resultDataBase =_dataBase.ShowCreateGames(creatorcouching);
+                    if ( resultDataBase != ("-1")) {
+                        answer.put("answer", resultDataBase);
+                        result = resultDataBase;
+                    } else {
+                        answer.put("answer", "error pipez");
                         result = answer.toJSONString();
                     }
                 }

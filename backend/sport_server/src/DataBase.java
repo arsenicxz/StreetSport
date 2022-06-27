@@ -1,3 +1,4 @@
+import com.sun.source.tree.WhileLoopTree;
 import jdk.javadoc.doclet.Taglet;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -163,17 +164,17 @@ public class DataBase {
     }
 
     //создание игры
-    //НЕ РАБОТАЕТ КОДИРОВКА ДЛЯ АДРЕСА И ПРОФИЛЯ
     public boolean Couching (int gametypeid, int tournamentid, LocalDate date,
-                            Time time, int rating, String creatorcouching, String address,
-                            double latitude, double longitude, int count) {
+                             Time time, int rating, String creatorcouching, String address,
+                             double latitude, double longitude, int count, double userrating) {
 
         try {
             String query = "INSERT INTO couching " +
-                    "(gametypeid, tournamentid, date, time, " +
-                    "creatorcouching, address, latitude, longitude, count) " +
-                    "VALUES ('" + gametypeid + "','" + tournamentid + "','" + date + "','" + time + "',  '"+rating+"' " +
-                    "'" + creatorcouching + "',N'"+address+"', '" + latitude + "','" + longitude + "', '"+count+"')";
+                    "(gametypeid, tournamentid, date, time, rating, " +
+                    "creatorcouching, address, latitude, longitude, count, userrating) " +
+                    "VALUES ('" + gametypeid + "','" + tournamentid + "','" + date + "','" + time + "',  '"+rating+"', " +
+                    "'" + creatorcouching + "', '"+address+"', '" + latitude + "','" + longitude + "', '"+count+"', '"+userrating+"')";
+            System.out.println(query);
             PreparedStatement prSt = dbConnection.prepareStatement(query);
             boolean res = prSt.execute(query);
             System.out.println(res);
@@ -185,12 +186,15 @@ public class DataBase {
     }
 
     //завершение игры
-    public boolean GameEnding (int couchingid, int played) {
+    public boolean GameEnding (int couchingid, int played, String creator) {
         try {
             String query = "UPDATE couching SET played = '" + played + "' WHERE couchingid = '" + couchingid + "' ";
             PreparedStatement prSt = dbConnection.prepareStatement(query);
             boolean res = prSt.execute(query);
             System.out.println(res);
+
+            UserRating(creator);
+
             return  true;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -216,21 +220,34 @@ public class DataBase {
                 System.out.println(tournametid);
                 String time = result.getString(5);
                 System.out.println(time);
-                String duration = result.getString(8);
-                System.out.println(duration);
+                String rating = result.getString(7);
+                System.out.println(rating);
+                String creatorcouching = result.getString(9);
+                System.out.println(creatorcouching);
+                String address = result.getString(10);
+                System.out.println(address);
                 String latitude = result.getString(11);
                 System.out.println(latitude);
                 String longitude = result.getString(12);
                 System.out.println(longitude);
+                String count = result.getString(13);
+                System.out.println(count);
+                String userrating = result.getString(14);
+                System.out.println(userrating);
 
                 JSONObject resultJSON = new JSONObject();
                 resultJSON.put("couchingid", couchingid);
                 resultJSON.put("gametypeid", gametype);
                 resultJSON.put("tournametid", tournametid);
                 resultJSON.put("time", time);
-                resultJSON.put("duration", duration);
+                resultJSON.put("rating", rating);
+                resultJSON.put("creatorcouching", creatorcouching);
+                resultJSON.put("address", address);
                 resultJSON.put("latitude", latitude);
                 resultJSON.put("longitude", longitude);
+                resultJSON.put("count", count);
+                resultJSON.put("userrating", userrating);
+
                 list.add(resultJSON);
             }
             return list.toJSONString();
@@ -269,7 +286,7 @@ public class DataBase {
     //показать профиль пользователя
     public String ShowUserProfile (String id) {
         int idInt = Integer.parseInt(id);
-        String query = "SELECT username, telephone, mail FROM user " +
+        String query = "SELECT username, telephone, mail, userrating FROM user " +
                 "WHERE userid = '" + idInt+ "'";
         try {
             PreparedStatement prSt = dbConnection.prepareStatement(query);
@@ -281,11 +298,14 @@ public class DataBase {
                 System.out.println(telephone);
                 String mail = result.getString(3);
                 System.out.println(mail);
+                String userrating = result.getString(4);
+                System.out.println(userrating);
 
                 JSONObject resultJSON = new JSONObject();
                 resultJSON.put("username", username);
                 resultJSON.put("telephone", telephone);
                 resultJSON.put("mail", mail);
+                resultJSON.put("userrating", userrating);
                 return resultJSON.toJSONString();
             }
             return "-1";
@@ -308,6 +328,97 @@ public class DataBase {
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    //рейтинг пользователя по итогу игры
+    public boolean UserRating (String creatorcouching) {
+        try {
+            String query1 = "SELECT COUNT(played) FROM couching WHERE creatorcouching = '"+creatorcouching+"' ";
+            PreparedStatement prSt1 = dbConnection.prepareStatement(query1);
+            ResultSet res1 =  prSt1.executeQuery();
+            String allplayed = null;
+            while (res1.next()) {
+                allplayed = res1.getString(1);
+                System.out.println(allplayed);
+            }
+
+            String query2 = "SELECT COUNT(played) FROM couching WHERE played=1 AND creatorcouching = '"+creatorcouching+"' ";
+            PreparedStatement prSt2 = dbConnection.prepareStatement(query2);
+            ResultSet res2 =  prSt2.executeQuery();
+            String goodplayed = null;
+            while (res2.next()) {
+                goodplayed = res2.getString(1);
+                System.out.println(goodplayed);
+            }
+
+            double koef = Double.parseDouble(allplayed)/5;
+            double rating = Double.parseDouble(goodplayed)/koef;
+
+            rating = Math.round(rating * 100.0) / 100.0;
+            System.out.println(rating);
+
+            String query3 = "UPDATE user SET userrating = '"+rating+"' WHERE username = '"+creatorcouching+"'";
+            PreparedStatement prSt = dbConnection.prepareStatement(query3);
+            boolean res = prSt.execute(query3);
+            System.out.println(res);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    //показать, созданные пользователем игры
+    public String ShowCreateGames (String creatorcouching) {
+        String query = "SELECT gametypeid, tournamentid, date, time, played, rating, address, " +
+                "latitude, longitude, count FROM couching WHERE creatorcouching = '"+creatorcouching+"' ";
+        try {
+            PreparedStatement prSt = dbConnection.prepareStatement(query);
+            ResultSet result =  prSt.executeQuery();
+            JSONArray list = new JSONArray();
+            while (result.next()) {
+
+                String gametypeid = result.getString(1);
+                System.out.println(gametypeid);
+                String tournametid = result.getString(2);
+                System.out.println(tournametid);
+                String date = result.getString(3);
+                System.out.println(date);
+                String time = result.getString(4);
+                System.out.println(time);
+                String played = result.getString(5);
+                System.out.println(played);
+                String rating = result.getString(6);
+                System.out.println(rating);
+                String address = result.getString(7);
+                System.out.println(address);
+                String latitude = result.getString(8);
+                System.out.println(latitude);
+                String longitude = result.getString(9);
+                System.out.println(longitude);
+                String count = result.getString(10);
+                System.out.println(count);
+
+                JSONObject resultJSON = new JSONObject();
+                resultJSON.put("gametypeid", gametypeid);
+                resultJSON.put("tournametid", tournametid);
+                resultJSON.put("date", date);
+                resultJSON.put("time", time);
+                resultJSON.put("played", played);
+                resultJSON.put("rating", rating);
+                resultJSON.put("address", address);
+                resultJSON.put("latitude", latitude);
+                resultJSON.put("longitude", longitude);
+                resultJSON.put("count", count);
+
+                list.add(resultJSON);
+            }
+            return list.toJSONString();
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+            return "-1";
         }
     }
 }
