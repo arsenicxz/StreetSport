@@ -1,5 +1,3 @@
-import com.sun.source.tree.WhileLoopTree;
-import jdk.javadoc.doclet.Taglet;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -185,23 +183,6 @@ public class DataBase {
         }
     }
 
-    //завершение игры
-    public boolean GameEnding (int couchingid, int played, String creator) {
-        try {
-            String query = "UPDATE couching SET played = '" + played + "' WHERE couchingid = '" + couchingid + "' ";
-            PreparedStatement prSt = dbConnection.prepareStatement(query);
-            boolean res = prSt.execute(query);
-            System.out.println(res);
-
-            UserRating(creator);
-
-            return  true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
     //поиск игр
     public String SearchGames (String gametypeid, LocalDate date) {
         String query = "SELECT * FROM couching " +
@@ -316,59 +297,6 @@ public class DataBase {
         }
     }
 
-    //подсчет записавшихся на игру
-    public boolean CountUsersOnGame (int couchingid) {
-        try {
-            String query = "UPDATE couching SET count =(count+1) WHERE couchingid = '"+couchingid+"'";
-            PreparedStatement prSt = dbConnection.prepareStatement(query);
-            boolean res = prSt.execute(query);
-            System.out.println(res);
-            return true;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    //рейтинг пользователя по итогу игры
-    public boolean UserRating (String creatorcouching) {
-        try {
-            String query1 = "SELECT COUNT(played) FROM couching WHERE creatorcouching = '"+creatorcouching+"' ";
-            PreparedStatement prSt1 = dbConnection.prepareStatement(query1);
-            ResultSet res1 =  prSt1.executeQuery();
-            String allplayed = null;
-            while (res1.next()) {
-                allplayed = res1.getString(1);
-                System.out.println(allplayed);
-            }
-
-            String query2 = "SELECT COUNT(played) FROM couching WHERE played=1 AND creatorcouching = '"+creatorcouching+"' ";
-            PreparedStatement prSt2 = dbConnection.prepareStatement(query2);
-            ResultSet res2 =  prSt2.executeQuery();
-            String goodplayed = null;
-            while (res2.next()) {
-                goodplayed = res2.getString(1);
-                System.out.println(goodplayed);
-            }
-
-            double koef = Double.parseDouble(allplayed)/5;
-            double rating = Double.parseDouble(goodplayed)/koef;
-
-            rating = Math.round(rating * 100.0) / 100.0;
-            System.out.println(rating);
-
-            String query3 = "UPDATE user SET userrating = '"+rating+"' WHERE username = '"+creatorcouching+"'";
-            PreparedStatement prSt = dbConnection.prepareStatement(query3);
-            boolean res = prSt.execute(query3);
-            System.out.println(res);
-            return true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
     //показать, созданные пользователем игры
     public String ShowCreateGames (String creatorcouching) {
         String query = "SELECT gametypeid, tournamentid, date, time, played, rating, address, " +
@@ -417,6 +345,145 @@ public class DataBase {
             return list.toJSONString();
         }
         catch (SQLException e) {
+            e.printStackTrace();
+            return "-1";
+        }
+    }
+
+    //рейтинг пользователя по итогу игры
+    /*public boolean UserRating (String creatorcouching) {
+        try {
+            String query1 = "SELECT COUNT(played) FROM couching WHERE creatorcouching = '"+creatorcouching+"' ";
+            PreparedStatement prSt1 = dbConnection.prepareStatement(query1);
+            ResultSet res1 =  prSt1.executeQuery();
+            String allplayed = null;
+            while (res1.next()) {
+                allplayed = res1.getString(1);
+                System.out.println(allplayed);
+            }
+
+            String query2 = "SELECT COUNT(played) FROM couching WHERE played=1 AND creatorcouching = '"+creatorcouching+"' ";
+            PreparedStatement prSt2 = dbConnection.prepareStatement(query2);
+            ResultSet res2 =  prSt2.executeQuery();
+            String goodplayed = null;
+            while (res2.next()) {
+                goodplayed = res2.getString(1);
+                System.out.println(goodplayed);
+            }
+
+            double koef = Double.parseDouble(allplayed)/5;
+            double rating = Double.parseDouble(goodplayed)/koef;
+
+            rating = Math.round(rating * 100.0) / 100.0;
+            System.out.println(rating);
+
+            String query3 = "UPDATE user SET userrating = '"+rating+"' WHERE username = '"+creatorcouching+"'";
+            PreparedStatement prSt = dbConnection.prepareStatement(query3);
+            boolean res = prSt.execute(query3);
+            System.out.println(res);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }*/
+
+    //подсчет записавшихся на игру
+    /*public boolean CountUsersOnGame (int couchingid) {
+        try {
+            String query = "UPDATE couching SET count =(count+1) WHERE couchingid = '"+couchingid+"'";
+            PreparedStatement prSt = dbConnection.prepareStatement(query);
+            boolean res = prSt.execute(query);
+            System.out.println(res);
+            return true;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }*/
+
+    //завершение игры
+    /*public boolean GameEnding (int couchingid, int played, String creator) {
+        try {
+            String query = "UPDATE couching SET played = '" + played + "' WHERE couchingid = '" + couchingid + "' ";
+            PreparedStatement prSt = dbConnection.prepareStatement(query);
+            boolean res = prSt.execute(query);
+            System.out.println(res);
+
+            UserRating(creator);
+
+            return  true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }*/
+
+    //запись на игру (НОВАЯ)
+    public boolean PlayGame (int couchingid, String username) {
+        try {
+            //здесь должен быть check
+
+            String query = "INSERT INTO whoingame (couchingid, username) VALUES ('"+couchingid+"', '"+username+"') ";
+            PreparedStatement prSt = dbConnection.prepareStatement(query);
+            boolean res = prSt.execute(query);
+            System.out.println(res);
+
+            Update(couchingid);
+
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public boolean Update (int couchingid) {
+        try {
+            String query = "UPDATE couching SET count =(count+1) WHERE couchingid = '"+couchingid+"' ";
+            PreparedStatement prSt = dbConnection.prepareStatement(query);
+            boolean res = prSt.execute(query);
+            System.out.println(res);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public boolean Check (int couchingid, String username) {
+        try {
+            String query = "SELECT * FROM whoingame WHERE couchingid='"+couchingid+"' AND username='"+username+"'";
+            PreparedStatement prSt = dbConnection.prepareStatement(query);
+            ResultSet result =  prSt.executeQuery();
+            //НАДО СДЕЛАТЬ ТАК, ЧТОБ ПРИ ВИДЕ ПУСТОГО РЕЗУЛЬТАТА, ОН ЗАИСЫВАЛ ЧЕЛОВЕКА
+            //ЕСЛИ РЕЗУЛЬТАТ ЗАПРОСА НЕ ПУСТОЙ, ТО ЕСТЬ ЧЕЛОВЕК УЖЕ ЗАПИСАН В ИГРУ,
+            //ТО ДАЛЬШЕ НЕ ЗАПИСЫВАТЬ ЕГО
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    //показать, записавшихся на игру (НОВАЯ)
+    public String ShowWhoInGame (int couchingid) {
+        try {
+            String query = "SELECT * FROM whoingame WHERE couchingid = '"+couchingid+"' ";
+            PreparedStatement prSt = dbConnection.prepareStatement(query);
+            ResultSet result =  prSt.executeQuery();
+            JSONArray list = new JSONArray();
+
+            while (result.next()) {
+                String username = result.getString(2);
+                System.out.println(username);
+
+                JSONObject resultJSON = new JSONObject();
+                resultJSON.put("username", username);
+
+                list.add(resultJSON);
+            }
+            return list.toJSONString();
+        } catch (SQLException e) {
             e.printStackTrace();
             return "-1";
         }

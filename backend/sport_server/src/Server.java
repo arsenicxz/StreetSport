@@ -43,10 +43,14 @@ public class Server {
         _server.createContext("/editusergames", new EditUserGamesHandler()); //редактировать игры в профиле
         _server.createContext("/searchgames", new SearchGamesHandler()); //поиск игры
         _server.createContext("/showalltypes", new ShowAllTypes()); //показать все виды игр
-        _server.createContext("/play", new PlayGameHandler()); //записаться на игру
+        //_server.createContext("/play", new PlayGameHandler()); //записаться на игру
         _server.createContext("/creategame", new CreateGameHandler()); //создать игру
-        _server.createContext("/gameending", new EndingGameHandler()); //окончание игры
+        //_server.createContext("/gameending", new EndingGameHandler()); //окончание игры
         _server.createContext("/showmycreatedgames", new ShowCreateGamesHandler()); //показать, созданные пользователем игры
+
+        //НОВЫЕ
+        _server.createContext("/takepartingame", new TakePartInGame());
+        _server.createContext("/whoingame", new ShowWhoInGame());
 
         _server.setExecutor(null);
     }
@@ -568,8 +572,8 @@ public class Server {
         }
     }
 
-    //записаться на игру
-    public static class PlayGameHandler extends MyHttpHandler {
+    //показать, созданные пользователем игры
+    public static class ShowCreateGamesHandler extends MyHttpHandler {
         private DataBase _dataBase;
         @Override
         public int HandleHtml(String request, StringBuilder answer, String request_url) {
@@ -596,13 +600,13 @@ public class Server {
                 JSONObject req = (JSONObject) obj;
                 String mod = (String) req.get("mod");
 
-                if (mod.contains("UserWantToPlay")) {
-                    String id = (String) req.get("couchingid");
-                    int couchingid = Integer.parseInt(id);
-                    System.out.println("couchingid: " + couchingid);
-                    if (_dataBase.CountUsersOnGame(couchingid)) {
-                        answer.put("answer", "you're in game!");
-                        result = answer.toJSONString();
+                if (mod.contains("ShowMyCreatedGames")) {
+                    String creatorcouching = (String) req.get("creatorcouching");
+                    System.out.println("creatorcouching: " + creatorcouching);
+                    String resultDataBase =_dataBase.ShowCreateGames(creatorcouching);
+                    if ( resultDataBase != ("-1")) {
+                        answer.put("answer", resultDataBase);
+                        result = resultDataBase;
                     } else {
                         answer.put("answer", "error pipez");
                         result = answer.toJSONString();
@@ -695,8 +699,55 @@ public class Server {
         }
     }
 
+    //записаться на игру
+    /*public static class PlayGameHandler extends MyHttpHandler {
+        private DataBase _dataBase;
+        @Override
+        public int HandleHtml(String request, StringBuilder answer, String request_url) {
+            try {
+                _dataBase = new DataBase();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.println(request);
+            String obrabotka = ParceRequest(request);
+            System.out.println(obrabotka);
+            answer.append(obrabotka);
+            return 200;
+        }
+
+        private String ParceRequest (String request) {
+            JSONObject answer = new JSONObject();
+            answer.put("answer", "server error kapez");
+            String result = answer.toJSONString();
+            try {
+                Object obj = new JSONParser().parse(request);
+                JSONObject req = (JSONObject) obj;
+                String mod = (String) req.get("mod");
+
+                if (mod.contains("UserWantToPlay")) {
+                    String id = (String) req.get("couchingid");
+                    int couchingid = Integer.parseInt(id);
+                    System.out.println("couchingid: " + couchingid);
+                    if (_dataBase.CountUsersOnGame(couchingid)) {
+                        answer.put("answer", "you're in game!");
+                        result = answer.toJSONString();
+                    } else {
+                        answer.put("answer", "error pipez");
+                        result = answer.toJSONString();
+                    }
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            return result;
+        }
+    }*/
+
     //окончание игры
-    public static class EndingGameHandler extends MyHttpHandler {
+    /*public static class EndingGameHandler extends MyHttpHandler {
         DataBase _dataBase;
         @Override
         public int HandleHtml(String request, StringBuilder answer, String request_url) {
@@ -743,10 +794,10 @@ public class Server {
             }
             return result;
         }
-    }
+    }*/
 
-    //показать, созданные пользователем игры
-    public static class ShowCreateGamesHandler extends MyHttpHandler {
+    //записаться на игру (НОВАЯ)
+    public static class TakePartInGame extends MyHttpHandler {
         private DataBase _dataBase;
         @Override
         public int HandleHtml(String request, StringBuilder answer, String request_url) {
@@ -773,12 +824,62 @@ public class Server {
                 JSONObject req = (JSONObject) obj;
                 String mod = (String) req.get("mod");
 
-                if (mod.contains("ShowMyCreatedGames")) {
-                    String creatorcouching = (String) req.get("creatorcouching");
-                    System.out.println("creatorcouching: " + creatorcouching);
-                    String resultDataBase =_dataBase.ShowCreateGames(creatorcouching);
-                    if ( resultDataBase != ("-1")) {
-                        answer.put("answer", resultDataBase);
+                if (mod.contains("TakePartInGame")) {
+                    String cid = (String) req.get("couchingid");
+                    int couchingid = Integer.parseInt(cid);
+                    System.out.println("couchingid: " + couchingid);
+                    String username = (String) req.get("username");
+                    System.out.println("username: " + username);
+                    if (_dataBase.PlayGame(couchingid, username)) {
+                        answer.put("answer", "user are in game");
+                        result = answer.toJSONString();
+                    } else {
+                        answer.put("answer", "error pipez");
+                        result = answer.toJSONString();
+                    }
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            return result;
+        }
+    }
+
+    //показать, кто записался на игры (по никнейму)
+    public static class ShowWhoInGame extends MyHttpHandler {
+        private DataBase _dataBase;
+        @Override
+        public int HandleHtml(String request, StringBuilder answer, String request_url) {
+            try {
+                _dataBase = new DataBase();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.println(request);
+            String obrabotka = ParceRequest(request);
+            System.out.println(obrabotka);
+            answer.append(obrabotka);
+            return 200;
+        }
+
+        private String ParceRequest (String request) {
+            JSONObject answer = new JSONObject();
+            answer.put("answer", "server error kapez");
+            String result = answer.toJSONString();
+            try {
+                Object obj = new JSONParser().parse(request);
+                JSONObject req = (JSONObject) obj;
+                String mod = (String) req.get("mod");
+
+                if (mod.contains("ShowWhoInGame")) {
+                    String cid = (String) req.get("couchingid");
+                    int couchingid = Integer.parseInt(cid);
+                    System.out.println("couchingid: " + couchingid);
+                    String resultDataBase = _dataBase.ShowWhoInGame(couchingid);
+                    if (resultDataBase != "-1") {
+                        answer.put("answer", "this users are in game");
                         result = resultDataBase;
                     } else {
                         answer.put("answer", "error pipez");
