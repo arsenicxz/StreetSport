@@ -49,8 +49,10 @@ public class Server {
         _server.createContext("/showmycreatedgames", new ShowCreateGamesHandler()); //показать, созданные пользователем игры
 
         //НОВЫЕ
-        _server.createContext("/takepartingame", new TakePartInGame());
-        _server.createContext("/whoingame", new ShowWhoInGame());
+        _server.createContext("/takepartingame", new TakePartInGameHandler());
+        _server.createContext("/whoingame", new ShowWhoInGameHandler());
+        _server.createContext("/setphoto", new SetPhotoHandler());
+        _server.createContext("/getphoto", new GetPhotoHandler());
 
         _server.setExecutor(null);
     }
@@ -797,7 +799,7 @@ public class Server {
     }*/
 
     //записаться на игру (НОВАЯ)
-    public static class TakePartInGame extends MyHttpHandler {
+    public static class TakePartInGameHandler extends MyHttpHandler {
         private DataBase _dataBase;
         @Override
         public int HandleHtml(String request, StringBuilder answer, String request_url) {
@@ -846,7 +848,7 @@ public class Server {
     }
 
     //показать, кто записался на игры (по никнейму)
-    public static class ShowWhoInGame extends MyHttpHandler {
+    public static class ShowWhoInGameHandler extends MyHttpHandler {
         private DataBase _dataBase;
         @Override
         public int HandleHtml(String request, StringBuilder answer, String request_url) {
@@ -880,6 +882,109 @@ public class Server {
                     String resultDataBase = _dataBase.ShowWhoInGame(couchingid);
                     if (resultDataBase != "-1") {
                         answer.put("answer", "this users are in game");
+                        result = resultDataBase;
+                    } else {
+                        answer.put("answer", "error pipez");
+                        result = answer.toJSONString();
+                    }
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            return result;
+        }
+    }
+
+    //добавить фото профиля
+    public static class SetPhotoHandler extends MyHttpHandler {
+        private DataBase _dataBase;
+        @Override
+        public int HandleHtml(String request, StringBuilder answer, String request_url) {
+            try {
+                _dataBase = new DataBase();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.println(request);
+            String obrabotka = ParceRequest(request);
+            System.out.println(obrabotka);
+            answer.append(obrabotka);
+            return 200;
+        }
+
+        private String ParceRequest (String request) {
+            JSONObject answer = new JSONObject();
+            answer.put("answer", "server error kapez");
+            String result = answer.toJSONString();
+            try {
+                Object obj = new JSONParser().parse(request);
+                JSONObject req = (JSONObject) obj;
+                String mod = (String) req.get("mod");
+
+                if (mod.contains("SetPhoto")) {
+                    String uid = (String) req.get("userid");
+                    int userid = Integer.parseInt(uid);
+                    System.out.println("userid: " + userid);
+                    String photo = (String) req.get("photo");
+                    int lenphoto = photo.length();
+
+                    if (lenphoto>4000000) {
+                        answer.put("answer", "your photo is big");
+                        result = answer.toJSONString();
+                    }
+
+                    if (_dataBase.SetPhoto(userid, photo)) {
+                        answer.put("answer", "now user have a photo");
+                        result = answer.toJSONString();
+                    } else {
+                        answer.put("answer", "error pipez");
+                        result = answer.toJSONString();
+                    }
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            return result;
+        }
+    }
+
+    //получить фото профиля
+    public static class GetPhotoHandler extends MyHttpHandler {
+        private DataBase _dataBase;
+        @Override
+        public int HandleHtml(String request, StringBuilder answer, String request_url) {
+            try {
+                _dataBase = new DataBase();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.println(request);
+            String obrabotka = ParceRequest(request);
+            System.out.println(obrabotka);
+            answer.append(obrabotka);
+            return 200;
+        }
+
+        private String ParceRequest (String request) {
+            JSONObject answer = new JSONObject();
+            answer.put("answer", "server error kapez");
+            String result = answer.toJSONString();
+            try {
+                Object obj = new JSONParser().parse(request);
+                JSONObject req = (JSONObject) obj;
+                String mod = (String) req.get("mod");
+
+                if (mod.contains("GetPhoto")) {
+                    String uid = (String) req.get("userid");
+                    int userid = Integer.parseInt(uid);
+                    System.out.println("userid: " + userid);
+                    String resultDataBase =_dataBase.GetPhoto(userid);
+                    if (resultDataBase!="-1") {
+                        answer.put("answer", "vot vashe photo");
                         result = resultDataBase;
                     } else {
                         answer.put("answer", "error pipez");

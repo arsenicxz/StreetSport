@@ -1,5 +1,6 @@
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -480,6 +481,44 @@ public class DataBase {
                 JSONObject resultJSON = new JSONObject();
                 resultJSON.put("username", username);
 
+                list.add(resultJSON);
+            }
+            return list.toJSONString();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "-1";
+        }
+    }
+
+    public boolean SetPhoto (int userid, String photo) {
+        try {
+            String query = "INSERT INTO userphoto (userid, photo) VALUES ('"+userid+"', '"+photo+"')";
+            //String query = "UPDATE userphoto SET userid AND photo WHERE userid='"+userid+"' AND photo='"+photo+"'";
+            PreparedStatement prSt = dbConnection.prepareStatement(query);
+            boolean res = prSt.execute(query);
+            System.out.println(res);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public String GetPhoto (int userid) {
+        try {
+            String query = "SELECT * FROM userphoto WHERE userid='"+userid+"'";
+            PreparedStatement prSt = dbConnection.prepareStatement(query);
+            ResultSet result =  prSt.executeQuery();
+            JSONArray list = new JSONArray();
+            while (result.next()) {
+                String uid = result.getString(1);
+                System.out.println(uid);
+                String photo = result.getString(3);
+                System.out.println(photo);
+
+                JSONObject resultJSON = new JSONObject();
+                resultJSON.put("userid", uid);
+                resultJSON.put("photo", photo);
                 list.add(resultJSON);
             }
             return list.toJSONString();
