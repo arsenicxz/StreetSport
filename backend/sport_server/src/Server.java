@@ -53,6 +53,7 @@ public class Server {
         _server.createContext("/whoingame", new ShowWhoInGameHandler());
         _server.createContext("/setphoto", new SetPhotoHandler());
         _server.createContext("/getphoto", new GetPhotoHandler());
+        _server.createContext("/getcomment", new GetCommentHandler());
 
         _server.setExecutor(null);
     }
@@ -836,7 +837,7 @@ public class Server {
                         answer.put("answer", "user are in game");
                         result = answer.toJSONString();
                     } else {
-                        answer.put("answer", "error pipez");
+                        answer.put("answer", "this user are in game yet!!!");
                         result = answer.toJSONString();
                     }
                 }
@@ -986,6 +987,55 @@ public class Server {
                     if (resultDataBase!="-1") {
                         answer.put("answer", "vot vashe photo");
                         result = resultDataBase;
+                    } else {
+                        answer.put("answer", "error pipez");
+                        result = answer.toJSONString();
+                    }
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            return result;
+        }
+    }
+
+    //оставить отзыв
+    public static class GetCommentHandler extends MyHttpHandler {
+        private DataBase _dataBase;
+        @Override
+        public int HandleHtml(String request, StringBuilder answer, String request_url) {
+            try {
+                _dataBase = new DataBase();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.println(request);
+            String obrabotka = ParceRequest(request);
+            System.out.println(obrabotka);
+            answer.append(obrabotka);
+            return 200;
+        }
+
+        private String ParceRequest (String request) {
+            JSONObject answer = new JSONObject();
+            answer.put("answer", "server error kapez");
+            String result = answer.toJSONString();
+            try {
+                Object obj = new JSONParser().parse(request);
+                JSONObject req = (JSONObject) obj;
+                String mod = (String) req.get("mod");
+
+                if (mod.contains("GetComment")) {
+
+                    String comment = (String) req.get("comment");
+                    ByteBuffer byteBuffer2 = StandardCharsets.ISO_8859_1.encode(comment);
+                    String comutf8 = new String(byteBuffer2.array(), StandardCharsets.UTF_8);
+                    System.out.println(comutf8);
+                    if (_dataBase.GetComment(comutf8)) {
+                        answer.put("answer", "we got your comment");
+                        result = answer.toJSONString();
                     } else {
                         answer.put("answer", "error pipez");
                         result = answer.toJSONString();

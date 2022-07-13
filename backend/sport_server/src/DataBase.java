@@ -1,5 +1,6 @@
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.w3c.dom.Text;
 
 import java.io.IOException;
@@ -423,20 +424,24 @@ public class DataBase {
 
     //запись на игру (НОВАЯ)
     public boolean PlayGame (int couchingid, String username) {
-        try {
-            //здесь должен быть check
-
-            String query = "INSERT INTO whoingame (couchingid, username) VALUES ('"+couchingid+"', '"+username+"') ";
-            PreparedStatement prSt = dbConnection.prepareStatement(query);
-            boolean res = prSt.execute(query);
-            System.out.println(res);
-
-            Update(couchingid);
-
-            return true;
-        } catch (SQLException e) {
-            e.printStackTrace();
+        String check = Check(couchingid, username);
+        if (check.equals("1")) {
+            System.out.println("error: this user are in game yet!!!");
             return false;
+        } else {
+            try {
+                String query = "INSERT INTO whoingame (couchingid, username) VALUES ('"+couchingid+"', '"+username+"') ";
+                PreparedStatement prSt = dbConnection.prepareStatement(query);
+                boolean res = prSt.execute(query);
+                System.out.println(res);
+
+                Update(couchingid);
+
+                return true;
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return false;
+            }
         }
     }
     public boolean Update (int couchingid) {
@@ -451,18 +456,23 @@ public class DataBase {
             return false;
         }
     }
-    public boolean Check (int couchingid, String username) {
-        try {
-            String query = "SELECT * FROM whoingame WHERE couchingid='"+couchingid+"' AND username='"+username+"'";
-            PreparedStatement prSt = dbConnection.prepareStatement(query);
-            ResultSet result =  prSt.executeQuery();
-            //НАДО СДЕЛАТЬ ТАК, ЧТОБ ПРИ ВИДЕ ПУСТОГО РЕЗУЛЬТАТА, ОН ЗАИСЫВАЛ ЧЕЛОВЕКА
-            //ЕСЛИ РЕЗУЛЬТАТ ЗАПРОСА НЕ ПУСТОЙ, ТО ЕСТЬ ЧЕЛОВЕК УЖЕ ЗАПИСАН В ИГРУ,
-            //ТО ДАЛЬШЕ НЕ ЗАПИСЫВАТЬ ЕГО
-            return true;
+    public String Check (int couchingid, String username) {
+            String query = "SELECT EXISTS(SELECT * FROM whoingame WHERE couchingid = '"+couchingid+"' AND username='"+username+"') ";
+            try {
+                PreparedStatement prSt = dbConnection.prepareStatement(query);
+                ResultSet result =  prSt.executeQuery();
+                JSONObject list = new JSONObject();
+                String value=null;
+                while (result.next()) {
+                    value = result.getString(1);
+                    System.out.println(value);
+                    //JSONObject resultJSON = new JSONObject();
+                    //resultJSON.put("value", value);
+                }
+                return value;
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
+            return "-1";
         }
     }
 
@@ -490,6 +500,7 @@ public class DataBase {
         }
     }
 
+    //добавить фото профиля (НОВОЕ)
     public boolean SetPhoto (int userid, String photo) {
         try {
             String query = "INSERT INTO userphoto (userid, photo) VALUES ('"+userid+"', '"+photo+"')";
@@ -504,6 +515,7 @@ public class DataBase {
         }
     }
 
+    //показать фото профиля
     public String GetPhoto (int userid) {
         try {
             String query = "SELECT * FROM userphoto WHERE userid='"+userid+"'";
@@ -525,6 +537,20 @@ public class DataBase {
         } catch (SQLException e) {
             e.printStackTrace();
             return "-1";
+        }
+    }
+
+    //оставить отзыв
+    public boolean GetComment (String comment) {
+        try {
+            String query = "INSERT INTO comments (comment) VALUES ('"+comment+"')";
+            PreparedStatement prSt = dbConnection.prepareStatement(query);
+            boolean res = prSt.execute(query);
+            System.out.println(res);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 }
